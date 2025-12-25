@@ -1,0 +1,10 @@
+{
+  "name": "@template/contracts",
+  "version": "0.0.0",
+  "private": true,
+  "main": "src/index.ts",
+  "scripts": {
+    "compile": "echo \"Compile Move contracts (placeholder)\"",
+    "build": "echo \"No build configured\""
+  }
+}

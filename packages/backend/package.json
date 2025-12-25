@@ -1,0 +1,11 @@
+{
+  "name": "@template/backend",
+  "version": "0.0.0",
+  "private": true,
+  "main": "src/index.ts",
+  "scripts": {
+    "dev": "echo \"Start backend dev server (not implemented)\"",
+    "build": "echo \"No build configured\"",
+    "test": "echo \"No tests configured\""
+  }
+}

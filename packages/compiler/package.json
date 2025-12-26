@@ -1,0 +1,16 @@
+{
+  "name": "@js2move/compiler",
+  "version": "0.1.0",
+  "private": true,
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "clean": "rimraf dist",
+    "test": "node --test",
+    "lint": "eslint 'src/**' --fix"
+  },
+  "devDependencies": {
+    "typescript": "^5.2.0"
+  }
+}

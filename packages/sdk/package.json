@@ -1,5 +1,5 @@
 {
-  "name": "@template/sdk",
+  "name": "@js2move/sdk",
   "version": "0.0.0",
   "private": true,
   "main": "src/index.ts",

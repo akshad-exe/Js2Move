@@ -1,8 +1,8 @@
-# @template/shared-types
+# @js2move/shared-types
 
-Shared TypeScript type definitions used across this template monorepo.
+Shared TypeScript type definitions used across the Js2Move codebase.
 
-> Note: This package is part of a monorepo. Local secrets, build outputs and `node_modules/` are excluded by `.gitignore`. Add sample files like `README` or `types.example.ts` when sharing necessary non-sensitive defaults.
+> Note: This package is part of the Js2Move repository. Local secrets, build outputs and `node_modules/` are excluded by `.gitignore`. Add sample files like `README` or `types.example.ts` when sharing necessary non-sensitive defaults.
 
 ## 📋 Overview
 
@@ -22,16 +22,16 @@ Benefits:
 
 ### Installation
 
-From another package in the monorepo:
+From another package in the repository:
 
 ```bash
 # Add as dependency in package.json
-pnpm add @template/shared-types --workspace
+pnpm add @js2move/shared-types --workspace
 ```
 
 ### Usage
 
-Import types such as Contract, ChainEvent, User, and TransactionStatus from `@template/shared-types` and use them across frontend, backend, and SDK packages for consistent typing. Refer to the `src/` files in this package for the full list of exported types and their definitions.
+Import types such as Contract, ChainEvent, User, and TransactionStatus from `@js2move/shared-types` and use them across frontend, backend, and SDK packages for consistent typing. Refer to the `src/` files in this package for the full list of exported types and their definitions.
 
 
 

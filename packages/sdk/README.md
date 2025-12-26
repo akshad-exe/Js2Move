@@ -1,8 +1,8 @@
-# @template/sdk
+# @js2move/sdk
 
-JavaScript/TypeScript SDK for interacting with smart contracts in this template monorepo.
+JavaScript/TypeScript SDK for interacting with smart contracts in the Js2Move codebase.
 
-> Note: This package is part of a monorepo. Local secrets and build artifacts (e.g., `.env`, `node_modules/`) are excluded by `.gitignore`. Commit a `.env.example` with non-sensitive defaults.
+> Note: This package is part of the Js2Move repository. Local secrets and build artifacts (e.g., `.env`, `node_modules/`) are excluded by `.gitignore`. Commit a `.env.example` with non-sensitive defaults.
 
 ## 📋 Overview
 
@@ -18,17 +18,17 @@ The SDK provides a simple, type-safe interface for:
 ### Installation
 
 ```bash
-npm install @template/sdk
+npm install @js2move/sdk
 # or
-yarn add @template/sdk
+yarn add @js2move/sdk
 # or
-pnpm add @template/sdk
+pnpm add @js2move/sdk
 ```
 
 ### Basic Usage
 
 ```typescript
-import { TemplateClient } from '@template/sdk';
+import { TemplateClient } from '@js2move/sdk';
 
 // Initialize client
 const client = new TemplateClient({
@@ -54,7 +54,7 @@ console.log('Transaction:', tx.hash);
 ### Client Initialization
 
 ```typescript
-import { TemplateClient, NetworkType } from '@template/sdk';
+import { TemplateClient, NetworkType } from '@js2move/sdk';
 
 const client = new TemplateClient({
   network: 'testnet' as NetworkType,
@@ -167,7 +167,7 @@ client.off('ContractCalled', handler);
 ### Network Configuration
 
 ```typescript
-import { TemplateClient } from '@template/sdk';
+import { TemplateClient } from '@js2move/sdk';
 
 // Testnet
 const testnetClient = new TemplateClient({
@@ -207,7 +207,7 @@ import type {
   DeployContractParams,
   CallContractParams,
   TransactionResponse
-} from '@template/sdk';
+} from '@js2move/sdk';
 
 // Fully typed
 const contract: Contract = await client.contracts.getByAddress('0x...');
@@ -232,7 +232,7 @@ pnpm test:integration
 ### Example Test
 
 ```typescript
-import { TemplateClient } from '@template/sdk';
+import { TemplateClient } from '@js2move/sdk';
 
 describe('TemplateClient', () => {
   let client: TemplateClient;
@@ -276,7 +276,7 @@ try {
 ### Example Contract Flow
 
 ```typescript
-import { TemplateClient } from '@template/sdk';
+import { TemplateClient } from '@js2move/sdk';
 
 async function exampleFlow() {
   const client = new TemplateClient({ network: 'testnet' });

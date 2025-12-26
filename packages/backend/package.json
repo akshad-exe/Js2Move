@@ -1,11 +1,44 @@
 {
-  "name": "@template/backend",
+  "name": "@js2move/backend",
   "version": "0.0.0",
   "private": true,
-  "main": "src/index.ts",
+  "main": "dist/index.js",
   "scripts": {
-    "dev": "echo \"Start backend dev server (not implemented)\"",
-    "build": "echo \"No build configured\"",
-    "test": "echo \"No tests configured\""
+    "dev": "ts-node-dev --respawn --transpile-only -r tsconfig-paths/register src/index.ts",
+    "start": "node dist/index.js",
+    "start:indexer": "ts-node-dev --respawn --transpile-only -r tsconfig-paths/register src/indexer/index.ts",
+    "build": "tsc -p tsconfig.json",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate:dev": "prisma migrate dev --name init --create-only",
+    "prisma:studio": "prisma studio",
+    "test": "vitest",
+    "lint": "eslint 'src/**' --fix"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "zod": "^4.2.1",
+    "helmet": "^6.0.0",
+    "morgan": "^1.10.0",
+    "cors": "^2.8.5",
+    "@prisma/client": "^5.1.0",
+    "@js2move/compiler": "workspace:*",
+    "express-list-endpoints": "^2.0.0",
+    "winston": "^3.8.2",
+    "fs-extra": "^11.1.1"
+  },
+  "devDependencies": {
+    "dotenv": "^17.2.3",
+    "prisma": "^5.1.0",
+    "@types/morgan": "^1.9.3",
+    "@types/cors": "^2.8.12",
+    "typescript": "^5.2.0",
+    "ts-node-dev": "^2.0.0",
+    "@types/express": "^4.17.17",
+    "vitest": "^1.0.0",
+    "eslint": "^8.0.0",
+    "supertest": "^6.3.3",
+    "@types/supertest": "^2.0.12",
+    "@types/node": "^18.0.0",
+    "tsconfig-paths": "^4.1.0"
   }
 }

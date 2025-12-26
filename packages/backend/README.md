@@ -1,6 +1,6 @@
-# @template/backend
+# @js2move/backend
 
-Backend API and blockchain indexer service for the template Web3 monorepo boilerplate.
+Backend API and blockchain indexer service for the Js2Move project.
 
 ## 📋 Overview
 
@@ -28,7 +28,7 @@ The backend package provides:
 pnpm install
 
 # Or install for this package only
-pnpm --filter @template/backend install
+pnpm --filter @js2move/backend install
 ```
 
 ### Configuration
@@ -60,19 +60,19 @@ REDIS_URL=redis://localhost:6379
 pnpm install
 
 # Start API server (dev)
-pnpm --filter @template/backend dev
+pnpm --filter @js2move/backend dev
 
 # Start indexer worker
-pnpm --filter @template/backend start:indexer
+pnpm --filter @js2move/backend start:indexer
 
 # Build for production
-pnpm --filter @template/backend build
+pnpm --filter @js2move/backend build
 
 # Run tests
-pnpm --filter @template/backend test
+pnpm --filter @js2move/backend test
 
 # Run linter
-pnpm --filter @template/backend lint
+pnpm --filter @js2move/backend lint
 ```
 
 Add the following scripts to `package.json` (suggested):
@@ -109,6 +109,8 @@ packages/backend/
 │   ├── services/         # Business logic
 │   ├── utils/            # Shared utilities
 │   └── index.ts          # Entry point
+
+**Architecture note:** This backend follows a lightweight **MVC** pattern: `routes` → `controllers` → `services` → `models` (DB).
 ├── tests/
 ├── package.json
 └── tsconfig.json
@@ -129,10 +131,10 @@ How to run the indexer (example):
 
 ```bash
 # Start backend server (API only)
-pnpm --filter @template/backend dev
+pnpm --filter @js2move/backend dev
 
 # Start indexer worker (background)
-pnpm --filter @template/backend start:indexer
+pnpm --filter @js2move/backend start:indexer
 
 # Run both (via helper script)
 ./scripts/dev-all.sh

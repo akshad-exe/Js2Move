@@ -1,6 +1,6 @@
-# @template/contracts
+# @js2move/contracts
 
-Move smart contracts for a generic Web3 application (template boilerplate) built with the Move language.
+Move smart contracts for the Js2Move project, implemented in the Move language.
 
 ## 📋 Overview
 

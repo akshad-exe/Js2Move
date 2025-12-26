@@ -1,10 +1,12 @@
-# Web3 Monorepo Boilerplate
+# Js2Move — Move-based Web3 Codebase
 
-A production-ready, opinionated monorepo boilerplate for building Web3 applications with smart contracts, backend services, SDK, and frontend.
+Js2Move is the codebase for building Move smart contracts, backend services, a versatile SDK, and frontend applications — all designed for Move-based blockchain development.
+
+> Note: This repository uses the `@js2move/*` package namespace for internal packages and examples.
 
 ## ✨ Features
 
-- **📦 Monorepo Structure**: PNPM workspace with optimized package management
+- **� Repository Layout**: PNPM workspace with optimized package management
 - **🔗 Smart Contracts**: Move-based contracts for blockchain deployment
 - **⚙️ Backend Services**: Node.js/TypeScript API with blockchain indexer
 - **🛠️ SDK Package**: JavaScript/TypeScript SDK for contract interaction
@@ -27,7 +29,7 @@ A production-ready, opinionated monorepo boilerplate for building Web3 applicati
 1. **Clone this repository**
    ```bash
    git clone <your-repo-url>
-   cd Monorepo-template
+   cd Js2Move
    ```
 
 2. **Install dependencies**
@@ -41,14 +43,14 @@ A production-ready, opinionated monorepo boilerplate for building Web3 applicati
    ./scripts/dev-all.sh
    
    # Or start individually
-   pnpm --filter @template/backend dev
-   pnpm --filter frontend dev
+   pnpm --filter @js2move/backend dev
+   pnpm --filter @js2move/frontend dev
    ```
 
-## 🏗️ Project Structure
+## 🏗️ Codebase Structure
 
 ```
-monorepo-template/
+Js2Move/
 ├── frontend/                    # Next.js 14 application
 ├── packages/
 │   ├── backend/                 # API + Indexer service
@@ -67,30 +69,30 @@ monorepo-template/
 
 | Package | Description | Version |
 |---------|-------------|---------|
-| `@template/backend` | Node.js API & blockchain indexer | 0.0.0 |
-| `@template/contracts` | Move smart contracts | 0.0.0 |
-| `@template/sdk` | JavaScript/TypeScript SDK | 0.0.0 |
-| `@template/shared-types` | Shared TypeScript types | 0.0.0 |
-| `@template/frontend` | Next.js 14 web application | 0.0.0 |
+| `@js2move/backend` | Node.js API & blockchain indexer | 0.1.0 |
+| `@js2move/contracts` | Move smart contracts | 0.1.0 |
+| `@js2move/sdk` | JavaScript/TypeScript SDK | 0.1.0 |
+| `@js2move/shared-types` | Shared TypeScript types | 0.1.0 |
+| `@js2move/frontend` | Next.js 14 web application | 0.1.0 |
 
 ## 🔧 Configuration
 
 ### Workspace Management
 
-This monorepo uses PNPM workspaces. Key commands:
+This repository uses PNPM workspaces. Key commands:
 
 ```bash
 # Install dependencies for all packages
 pnpm install
 
 # Run command in specific package
-pnpm --filter @template/backend <command>
+pnpm --filter @js2move/backend <command>
 
 # Run command in all packages
 pnpm -r <command>
 
 # Add dependency to specific package
-pnpm --filter @template/backend add <package>
+pnpm --filter @js2move/backend add <package>
 ```
 
 ### Environment Variables
@@ -130,7 +132,7 @@ Keep a `.env.example` checked in with non-sensitive defaults so collaborators kn
 pnpm -r build
 
 # Build specific package
-pnpm --filter @template/contracts build
+pnpm --filter @js2move/contracts build
 ```
 
 ### Docker Support
@@ -175,7 +177,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-**Built with ❤️ for the Web3 community**
+**Built with ❤️ for the Move Ecosystem**
 
 
 

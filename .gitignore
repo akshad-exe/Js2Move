@@ -31,7 +31,7 @@ yarn-error.log*
 .pnpm-debug.log*
 
 # env files (can opt-in for committing if needed)
-.env*
+.env
 
 # vercel
 .vercel
@@ -60,4 +60,27 @@ node_modules/
 
 # Task files
 # tasks.json
-# tasks/ 
+# tasks/
+
+# Compiled output
+/dist
+**/dist
+
+# Local SQLite DBs and data files
+*.db
+packages/**/dev.db
+/data
+**/data
+
+# Local env files (local override files)
+.env.local
+.env.*.local
+
+# Temp & cache
+tmp/
+temp/
+.cache/
+
+# Docker override
+docker-compose.override.yml
+

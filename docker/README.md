@@ -1,6 +1,6 @@
 # Docker
 
-This directory contains container and orchestration artifacts to run the monorepo services locally or in production-like environments. It includes a generalized docker-compose manifest and guidance for how to use it with the packages in this repo.
+This directory contains container and orchestration artifacts to run the project services locally or in production-like environments. It includes a docker-compose manifest and guidance for how to use it with the packages in this repository.
 
 What it provides
 - A baseline docker-compose file to start core services (database, cache) and local instances of the frontend, backend and optional development node.

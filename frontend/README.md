@@ -1,6 +1,6 @@
 # frontend
 
-Next.js 14 frontend application for the template monorepo boilerplate.
+Next.js 14 frontend application for the Js2Move project.
 
 ## Quick Start
 
@@ -16,7 +16,7 @@ Next.js 14 frontend application for the template monorepo boilerplate.
 pnpm install
 
 # Start frontend
-pnpm --filter @template/frontend dev
+pnpm --filter @js2move/frontend dev
 ```
 
 ### Environment

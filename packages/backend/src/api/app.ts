@@ -1,6 +1,6 @@
 import express from 'express';
 import router from '@/api/routes';
-import requestLogger, { log } from '@/utils/logger';
+import { requestLogger } from '@/config/logger';
 import logger from '@/config/logger';
 import { errorConverter, errorHandler } from '@/handlers/error.handler';
 import helmet from 'helmet';
@@ -56,7 +56,7 @@ app.use('/api', router);
 // Detailed health endpoint ✅
 app.get('/health', async (_req, res) => {
   const dbConnected = isDbConnected();
-  const checkpoint = await readCheckpoint().catch(() => ({}));
+  const checkpoint = (await readCheckpoint().catch(() => ({} as { lastIndexedBlock?: number })));
 
   res.json({
     status: dbConnected ? 'ok' : 'degraded',

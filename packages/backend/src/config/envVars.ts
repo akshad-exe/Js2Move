@@ -21,17 +21,31 @@ let parsedEnv;
 try {
   parsedEnv = envSchema.parse(process.env);
 } catch (err: any) {
-  if (err && err.errors) {
-    const details = err.errors.map((e: any) => `${e.path.join('.')}: ${e.message}`).join('; ');
-    throw new Error(`Environment validation failed: ${details}`);
+  const details = err && err.errors
+    ? err.errors.map((e: any) => `${e.path.join('.')}: ${e.message}`).join('; ')
+    : (err && err.message) || String(err);
+
+  // Attempt to log the validation failure with the tagged logger; fall back to console.error
+  try {
+    const { taggedLogger } = require('@/config/logger');
+    const SYSTEM = taggedLogger('SYSTEM');
+    SYSTEM.error(`Environment validation failed: ${details}`);
+  } catch (logErr) {
+    console.error('[SYSTEM] Environment validation failed:', details);
   }
-  throw err;
+
+  throw new Error(`Environment validation failed: ${details}`);
 }
 
 // Log immediately after envs are validated (use require to avoid import-order issues)
-const { taggedLogger } = require('@/config/logger');
-const SYSTEM = taggedLogger('SYSTEM');
-SYSTEM.info('Environment configuration loaded.');
+try {
+  const { taggedLogger } = require('@/config/logger');
+  const SYSTEM = taggedLogger('SYSTEM');
+  SYSTEM.info('Environment configuration loaded.');
+} catch (err) {
+  // In test environments or where path aliases are not resolved yet, fall back to console
+  console.info('[SYSTEM] Environment configuration loaded.');
+}
 
 export const env = parsedEnv;
 

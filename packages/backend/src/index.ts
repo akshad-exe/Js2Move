@@ -23,31 +23,38 @@ function maskDb(url?: string) {
   }
 }
 
-const server = app.listen(port, () => {
-  const dbInfo = maskDb(DATABASE_URL);
-  SERVER.info(`backend is live on http://localhost:${port}`);
-  SERVER.info(`@js2move/backend listening on ${port} (env=${NODE_ENV}, db=${dbInfo}, startIndexer=${START_INDEXER})`);
-});
-
-// connect to database (best-effort)
-connectWithRetry()
-  .then(() => PRISMA.info('connected to database'))
-  .catch((err) => PRISMA.error('DB connection failed', err));
-
-
-
-// optionally start the indexer in this process (or run it separately)
-if (START_INDEXER) {
-  startIndexer().catch((err) => {
-    console.error('Indexer failed', err);
-    process.exit(1);
+export function startServer(listenPort = port) {
+  const server = app.listen(listenPort, () => {
+    const dbInfo = maskDb(DATABASE_URL);
+    SERVER.info(`backend is live on http://localhost:${listenPort}`);
+    SERVER.info(`@js2move/backend listening on ${listenPort} (env=${NODE_ENV}, db=${dbInfo}, startIndexer=${START_INDEXER})`);
   });
+
+  // connect to database (best-effort)
+  connectWithRetry()
+    .then(() => PRISMA.info('connected to database'))
+    .catch((err) => PRISMA.error(`DB connection failed: ${err?.message || String(err)}`));
+
+  // optionally start the indexer in this process (or run it separately)
+  if (START_INDEXER) {
+    startIndexer().catch((err) => {
+      console.error('Indexer failed', err);
+      process.exit(1);
+    });
+  }
+
+  // graceful shutdown
+  process.on('SIGTERM', async () => {
+    await server.close();
+    process.exit(0);
+  });
+
+  return server;
 }
 
-// graceful shutdown
-process.on('SIGTERM', async () => {
-  await server.close();
-  process.exit(0);
-});
+// Only start server when this file is executed directly (not when imported by tests)
+if (require.main === module) {
+  startServer();
+}
 
 export default app;

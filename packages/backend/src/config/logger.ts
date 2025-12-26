@@ -33,4 +33,15 @@ export function taggedLogger(tag: string) {
   };
 }
 
+// Request logging middleware exported from the logging config
+export function requestLogger(req: import('express').Request, res: import('express').Response, next: import('express').NextFunction) {
+  const start = Date.now();
+  res.on('finish', () => {
+    const ms = Date.now() - start;
+    const status = res.statusCode;
+    logger.info(`${req.method} ${req.originalUrl} ${status} ${ms}ms`);
+  });
+  next();
+}
+
 export default logger;

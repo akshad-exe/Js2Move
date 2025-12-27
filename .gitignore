@@ -65,6 +65,11 @@ node_modules/
 # Compiled output
 /dist
 **/dist
+out/
+**/out/
+
+# Generated Move files (from MoveJS compilation)
+*.move
 
 # Local SQLite DBs and data files
 *.db

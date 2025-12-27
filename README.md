@@ -1,20 +1,40 @@
-# Js2Move — Move-based Web3 Codebase
+# Js2Move — Complete Movement Development Platform
 
-Js2Move is the codebase for building Move smart contracts, backend services, a versatile SDK, and frontend applications — all designed for Move-based blockchain development.
+Js2Move is a **complete development platform** for Movement blockchain. Write smart contracts in JavaScript-like syntax, compile to Move, and deploy with one click.
 
-> Note: This repository uses the `@js2move/*` package namespace for internal packages and examples.
+> **Think Hardhat for Movement** - Write, compile, test, and deploy all in one place.
+
+## 🎯 What This Does
+
+```
+Write .movejs → Compile to .move → Deploy to Blockchain
+(JS-like DSL)   (Our Compiler)    (One-Click Deploy) ⭐ NEW!
+```
 
 ## ✨ Features
 
-- **� Repository Layout**: PNPM workspace with optimized package management
-- **🔗 Smart Contracts**: Move-based contracts for blockchain deployment
-- **⚙️ Backend Services**: Node.js/TypeScript API with blockchain indexer
-- **🛠️ SDK Package**: JavaScript/TypeScript SDK for contract interaction
-- **🎨 Frontend**: Next.js 14 with App Router and Wallet integration
+### Compilation
+- **🔄 DSL Compiler**: Transform `.movejs` → `.move` source code
+- **🧪 Auto-Generated Tests**: Fixture-based testing system
+- **📚 Rich Examples**: Learn MoveJS with progressive examples
+
+### Deployment ⭐ NEW!
+- **🚀 One-Click Deploy**: Deploy from web UI with a button
+- **💻 CLI Deployment**: `movejs deploy Token.movejs --network testnet`
+- **📊 Deployment Tracking**: See all your deployed contracts
+- **🌐 Multi-Network**: Deploy to testnet or mainnet
+
+### Developer Tools
+- **🛠️ CLI Tool**: Compile and deploy from command line
+- **🌐 Web IDE**: Online editor with compilation and deployment
+- **📡 API Service**: REST API for programmatic access
+- **⚙️ Backend Services**: API + blockchain indexer + deployment service
+
+### Infrastructure
+- **📦 Monorepo**: PNPM workspace with optimized package management
 - **📘 TypeScript**: Full type safety across all packages
-- **🐳 Docker Support**: Containerized development and deployment
+- **🐳 Docker Support**: Containerized development
 - **🔄 CI/CD Ready**: GitHub Actions workflows included
-- **📚 Shared Types**: Common TypeScript definitions across packages
 
 ## 🚀 Quick Start
 
@@ -51,19 +71,27 @@ Js2Move is the codebase for building Move smart contracts, backend services, a v
 
 ```
 Js2Move/
-├── frontend/                    # Next.js 14 application
 ├── packages/
-│   ├── backend/                 # API + Indexer service
-│   ├── contracts/               # Move smart contracts
-│   ├── sdk/                     # JavaScript/TypeScript SDK
-│   └── shared-types/            # Shared TypeScript types
-├── docker/                      # Docker configurations
-├── infra/                       # CI/CD and infrastructure
-├── scripts/                     # Development scripts
-├── docs/                        # Documentation
-├── pnpm-workspace.yaml          # PNPM workspace config
-└── PROJECT_STRUCTURE.md         # Detailed structure docs
-```
+│   ├── compiler/                # Core compiler (lexer → parser → generator)
+│   │   ├── src/
+│   │   │   ├── lexer/          # Tokenization
+│   │   │   ├── parser/         # AST building
+│   │   │   ├── generator/      # Move code generation
+│   │   │   └── templates/      # Code generation templates
+│   │   ├── examples/           # Sample .movejs files
+│   │   └── tests/fixtures/     # Auto-discovered test cases
+│   ├── cli/                    # Command-line interface
+│   ├── backend/                # API service + indexer
+│   ├── sdk/                    # JavaScript/TypeScript SDK
+│   └── shared-types/           # Shared TypeScript types
+├── frontend/                   # Next.js 14 web application
+├── docker/                     # Docker configurations
+├── docs/                       # Documentation
+├── PROJECT_OVERVIEW.md         # Complete project explanation
+├── QUICK_START.md              # New team member guide
+└── pnpm-worcompiler` | DSL compiler (lexer, parser, generator) | 0.1.0 |
+| `@js2move/cli` | Command-line compilation tool | 0.1.0 |
+| `@js2move/backend` | API service & blockchain indexer
 
 ## 📦 Packages
 

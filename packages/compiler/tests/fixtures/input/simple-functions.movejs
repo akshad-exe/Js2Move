@@ -1,0 +1,10 @@
+// Test function with parameters and return type
+contract SimpleMath {
+  function add(a: u64, b: u64): u64 {
+    return a + b;
+  }
+
+  function multiply(x: u64, y: u64): u64 {
+    return x * y;
+  }
+}

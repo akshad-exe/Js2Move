@@ -1,0 +1,32 @@
+// 01-hello-world.movejs
+// The simplest possible MoveJS contract
+
+/**
+ * HelloWorld Contract
+ * 
+ * This contract demonstrates the basic structure of a MoveJS contract.
+ * It contains a simple resource and an initialization function.
+ */
+contract HelloWorld {
+  // Define a resource to store a greeting message
+  resource Greeting;
+
+  /**
+   * Initialize the contract
+   * @param owner - The address that will own the greeting
+   * @param message - The initial greeting message
+   */
+  init(owner: address, message: string) {
+    // Store the greeting for the owner
+    Greeting[owner] = message;
+  }
+
+  /**
+   * Get a greeting for an address
+   * @param addr - The address to get the greeting for
+   * @returns The greeting message
+   */
+  function getGreeting(addr: address): string {
+    return Greeting[addr];
+  }
+}

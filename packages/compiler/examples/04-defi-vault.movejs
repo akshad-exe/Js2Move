@@ -1,0 +1,134 @@
+// 04-defi-vault.movejs
+// A DeFi vault for staking and earning yield
+
+/**
+ * DeFiVault Contract
+ * 
+ * This contract implements a basic staking vault with:
+ * - Token deposits and withdrawals
+ * - Yield calculation based on time
+ * - User stake tracking
+ */
+contract DeFiVault {
+  // Resource to track user stakes
+  resource Stakes;
+
+  // Resource to track deposit timestamps
+  resource DepositTime;
+
+  // Resource to track total value locked (TVL)
+  resource TotalLocked;
+
+  // Annual percentage yield (APY) - e.g., 1000 = 10.00%
+  const APY: u64 = 1000;
+
+  /**
+   * Initialize the vault
+   * @param admin - The vault administrator
+   */
+  init(admin: address) {
+    TotalLocked[admin] = 0;
+  }
+
+  /**
+   * Deposit tokens into the vault
+   * @param user - The user depositing (must be signer)
+   * @param amount - The amount to deposit
+   */
+  deposit(user: signer, amount: u64) {
+    assert(amount > 0, "Amount must be positive");
+
+    // Get current time (in seconds)
+    let currentTime = now();
+
+    // Add to user's stake
+    if (Stakes[user] == null) {
+      Stakes[user] = amount;
+      DepositTime[user] = currentTime;
+    } else {
+      // If user already has stake, calculate and add pending rewards first
+      let pendingRewards = calculateRewards(user);
+      Stakes[user] = Stakes[user] + amount + pendingRewards;
+      DepositTime[user] = currentTime;
+    }
+
+    // Update TVL
+    TotalLocked[contract] = TotalLocked[contract] + amount;
+  }
+
+  /**
+   * Withdraw tokens from the vault
+   * @param user - The user withdrawing (must be signer)
+   * @param amount - The amount to withdraw
+   */
+  withdraw(user: signer, amount: u64) {
+    assert(Stakes[user] >= amount, "Insufficient stake");
+
+    // Calculate pending rewards
+    let pendingRewards = calculateRewards(user);
+    
+    // Total available = stake + rewards
+    let totalAvailable = Stakes[user] + pendingRewards;
+    assert(totalAvailable >= amount, "Insufficient balance");
+
+    // Deduct from user's stake
+    Stakes[user] = totalAvailable - amount;
+    
+    // Update deposit time
+    DepositTime[user] = now();
+
+    // Update TVL
+    TotalLocked[contract] = TotalLocked[contract] - amount;
+  }
+
+  /**
+   * Calculate pending rewards for a user
+   * @param user - The user address
+   * @returns The pending reward amount
+   */
+  function calculateRewards(user: address): u64 {
+    let stake = Stakes[user];
+    if (stake == 0) {
+      return 0;
+    }
+
+    let depositTime = DepositTime[user];
+    let currentTime = now();
+    let timeElapsed = currentTime - depositTime;
+
+    // Calculate rewards: (stake * APY * timeElapsed) / (365 days * 10000)
+    // APY is in basis points (10000 = 100%)
+    let secondsPerYear = 31536000; // 365 * 24 * 60 * 60
+    let rewards = (stake * APY * timeElapsed) / (secondsPerYear * 10000);
+
+    return rewards;
+  }
+
+  /**
+   * Get user's total balance (stake + pending rewards)
+   * @param user - The user address
+   * @returns The total balance
+   */
+  function balanceOf(user: address): u64 {
+    let stake = Stakes[user] || 0;
+    let rewards = calculateRewards(user);
+    return stake + rewards;
+  }
+
+  /**
+   * Get total value locked in the vault
+   * @returns The TVL
+   */
+  function getTVL(): u64 {
+    return TotalLocked[contract];
+  }
+
+  /**
+   * Get current timestamp (helper function)
+   * @returns Current Unix timestamp
+   */
+  function now(): u64 {
+    // This would be provided by the Move VM
+    return timestamp::now_seconds();
+  }
+}

@@ -1,0 +1,8 @@
+// Test single resource with initialization
+contract SingleResource {
+  resource Balance;
+
+  init(owner: address, amount: u64) {
+    Balance[owner] = amount;
+  }
+}

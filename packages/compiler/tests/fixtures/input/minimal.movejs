@@ -1,0 +1,4 @@
+// Minimal valid MoveJS contract
+contract Minimal {
+  resource Data;
+}

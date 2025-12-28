@@ -11,6 +11,11 @@
     "lint": "eslint 'src/**' --fix"
   },
   "devDependencies": {
+    "@types/node": "^18.19.130",
+    "ts-node": "^10.9.2",
     "typescript": "^5.2.0"
+  },
+  "dependencies": {
+    "handlebars": "^4.7.8"
   }
 }

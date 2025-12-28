@@ -1,0 +1,11 @@
+let from_addr = signer::address_of({{{from}}});
+let from_balance = borrow_global_mut<{{{resource}}}>(from_addr);
+    assert!(from_balance.value >= {{{amount}}}, {{{error}}});
+    from_balance.value = from_balance.value - {{{amount}}};
+
+    if (exists<{{{resource}}}>({{to}})) {
+        let to_balance = borrow_global_mut<{{{resource}}}>({{to}});
+            to_balance.value = to_balance.value + {{{amount}}};
+            } else {
+            move_to({{{from}}}, {{{resource}}} { value: {{{amount}}} });
+            }

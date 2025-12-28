@@ -2,15 +2,28 @@
   "name": "@js2move/compiler",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc -p tsconfig.json",
+    "build:out": "node scripts/build-out.js",
     "clean": "rimraf dist",
     "test": "node --test",
+    "test:fixtures": "node --test tests/fixtures.test.js",
+    "test:unit": "node --test tests/*.test.js",
+    "test:integration:aptos": "node --test tests/integration/aptos/compile.test.js",
+    "test:simple": "node tests/test-simple.js",
+    "test:full": "node tests/test-comprehensive.js",
+    "regenerate:fixtures": "node tests/regenerate-fixtures.js",
     "lint": "eslint 'src/**' --fix"
   },
+  "dependencies": {
+    "@js2move/shared-types": "workspace:*",
+    "handlebars": "^4.7.8"
+  },
   "devDependencies": {
-    "typescript": "^5.2.0"
+    "typescript": "^5.2.0",
+    "@types/node": "^20.0.0"
   }
 }

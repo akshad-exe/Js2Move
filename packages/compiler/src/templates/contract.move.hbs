@@ -1,3 +1,16 @@
+// Move contract template (Handlebars)
+
+module {{moduleName}} {
+  {{#each resources}}
+  resource struct {{this}} { value: u64 }
+  {{/each}}
+
+  {{#each functions}}
+  public entry fun {{name}}() {
+    // TODO: implement
+  }
+  {{/each}}
+}
 module {{moduleName}} {
   {{#each imports}}
   use {{module}};

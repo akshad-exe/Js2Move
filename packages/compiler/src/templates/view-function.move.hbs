@@ -1,0 +1,9 @@
+public fun {{name}}(
+{{#each params}}
+{{this.name}}: {{{this.type}}}{{#unless @last}},{{/unless}}
+{{/each}}
+): {{{returns}}} {
+{{#each body}}
+{{this}}
+{{/each}}
+}

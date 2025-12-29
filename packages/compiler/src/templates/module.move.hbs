@@ -1,0 +1,19 @@
+module {{moduleName}} {
+
+{{> imports}}
+
+{{> errors}}
+
+{{#each resources}}
+{{> resource}}
+{{/each}}
+
+{{#each structs}}
+{{> struct}}
+{{/each}}
+
+{{#each functions}}
+{{> function}}
+{{/each}}
+
+}

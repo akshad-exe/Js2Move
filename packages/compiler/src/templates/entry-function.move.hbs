@@ -1,0 +1,9 @@
+public entry fun {{name}}(
+{{#each params}}
+{{this.name}}: {{{this.type}}}{{#unless @last}},{{/unless}}
+{{/each}}
+){{#if acquires}} acquires {{{acquires}}}{{/if}} {
+{{#each body}}
+{{this}}
+{{/each}}
+}

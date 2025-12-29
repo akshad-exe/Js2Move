@@ -11,3 +11,29 @@ module {{moduleName}} {
   }
   {{/each}}
 }
+module {{moduleName}} {
+  {{#each imports}}
+  use {{module}};
+  {{/each}}
+
+  {{#each structs}}
+  struct {{name}} has {{#each abilities}}{{this}}{{#unless @last}}, {{/unless}}{{/each}} {
+    {{#each fields}}
+    {{name}}: {{type}},
+    {{/each}}
+  }
+
+  {{/each}}
+  {{#each functions}}
+  {{visibility}} fun {{name}}(
+    {{#each params}}
+    {{name}}: {{#if isSigner}}&signer{{else}}{{type}}{{/if}}{{#unless @last}},{{/unless}}
+    {{/each}}
+  ){{#if returnType}}: {{returnType}}{{/if}}{{#if acquires.length}} acquires {{#each acquires}}{{this}}{{#unless @last}}, {{/unless}}{{/each}}{{/if}} {
+    {{#each statements}}
+    {{{code}}}
+    {{/each}}
+  }
+
+  {{/each}}
+}

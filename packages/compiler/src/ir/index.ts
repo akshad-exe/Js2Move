@@ -1,8 +1,7 @@
-import { ASTNode } from '../ast';
+/**
+ * Intermediate Representation (IR) Module
+ * Exports IR builder and optimizer
+ */
 
-export type IR = any;
-
-export function toIR(ast: ASTNode): IR {
-  // Convert AST to IR. This is a stub; implement concrete IR operations later.
-  return { ops: [] };
-}
+export * from './ir-builder.js';
+export * from './optimizer.js';

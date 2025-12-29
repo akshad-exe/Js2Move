@@ -1,0 +1,14 @@
+// Test various expressions
+contract Expressions {
+  math_ops(a: u64, b: u64): u64 {
+    return (a + b) * (a - b);
+  }
+  
+  logical_ops(x: bool, y: bool): bool {
+    return x && y || false;
+  }
+  
+  comparison(n: u64): bool {
+    return n >= 10 && n <= 100;
+  }
+}

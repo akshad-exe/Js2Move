@@ -1,6 +1,7 @@
-export type ASTNode = {
-  type: string;
-  [k: string]: any;
-};
+/**
+ * AST Module
+ * Exports AST utilities, visitor pattern, and pretty printer
+ */
 
-export type Program = ASTNode & { body: ASTNode[] };
+export * from './visitor.js';
+export * from './printer.js';

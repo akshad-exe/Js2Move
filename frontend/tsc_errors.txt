@@ -1,0 +1,7 @@
+﻿src/components/effects/TextType.tsx(26,24): error TS6133: 'setIsDeleting' is declared but its value is never read.
+src/components/ui/GlareHover.tsx(1,8): error TS6133: 'React' is declared but its value is never read.
+src/components/ui/GlareHover.tsx(1,17): error TS1484: 'ReactNode' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/components/ui/GlareHover.tsx(1,28): error TS1484: 'CSSProperties' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+src/features/pages/DocsPage.tsx(9,9): error TS6133: 'theme' is declared but its value is never read.
+src/features/playground/StatusBar.tsx(1,1): error TS6133: 'motion' is declared but its value is never read.
+src/features/playground/StatusBar.tsx(2,24): error TS6133: 'XCircle' is declared but its value is never read.

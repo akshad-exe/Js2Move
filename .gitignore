@@ -76,6 +76,8 @@ out/
 packages/**/dev.db
 /data
 **/data
+# Exception: Allow frontend static data
+!frontend/src/data
 
 # Local env files (local override files)
 .env.local

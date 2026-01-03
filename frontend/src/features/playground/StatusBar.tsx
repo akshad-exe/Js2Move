@@ -1,5 +1,4 @@
-import { motion } from "framer-motion";
-import { CheckCircle2, XCircle, Loader2, Code, FileCode } from "lucide-react";
+import { CheckCircle2, Loader2, Code, FileCode } from "lucide-react";
 
 type StatusBarProps = {
     isCompiling: boolean;

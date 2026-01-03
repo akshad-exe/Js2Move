@@ -28,3 +28,8 @@ node_modules/
 .env
 *.log
 .DS_Store
+
+# TypeScript build artifacts
+error.txt
+tsc_errors.txt
+*_errors.txt

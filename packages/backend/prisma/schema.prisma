@@ -3,14 +3,64 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
 model Deployment {
-  id        String   @id @default(cuid())
-  txHash    String   @unique
-  status    String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id              String   @id @default(cuid())
+  source          String
+  compiledCode    String
+  contractAddress String?
+  txHash          String   @unique
+  network         String
+  status          String   // pending/success/failed
+  gasUsed         Int?
+  gasEstimate     Int?
+  moduleName      String?
+  error           String?
+  contracts       Contract[]  // relationship
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([network, status])
+  @@index([createdAt])
 }
+
+model Contract {
+  id              String  @id @default(cuid())
+  address         String  @unique
+  name            String?
+  network         String
+  deploymentId    String
+  deployment      Deployment @relation(fields: [deploymentId], references: [id], onDelete: Cascade)
+  verified        Boolean @default(false)
+  abi             String?
+  sourceCode      String?
+  createdAt       DateTime @default(now())
+
+  @@index([network, verified])
+  @@index([deploymentId])
+}
+
+model Compilation {
+  id         String   @id @default(cuid())
+  source     String
+  output     String?
+  success    Boolean
+  errors     String?
+  warnings   String?
+  duration   Int      // ms
+  createdAt  DateTime @default(now())
+}
+
+model Example {
+  id          String   @id                  // e.g. "01"
+  name        String
+  description String?
+  difficulty  String
+  source      String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+

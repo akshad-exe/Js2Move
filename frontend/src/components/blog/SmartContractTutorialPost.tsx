@@ -1,4 +1,3 @@
-import React from "react";
 import {
   BlogSection,
   BlogCode,
@@ -7,7 +6,7 @@ import {
   BlogCallout,
   BlogSubSection,
 } from "./BlogUI";
-import { Terminal, BookOpen, Rocket } from "lucide-react";
+import { BookOpen, Rocket } from "lucide-react";
 
 export function SmartContractTutorialPost() {
   return (

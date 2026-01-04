@@ -71,6 +71,9 @@ out/
 # Generated Move files (from MoveJS compilation)
 *.move
 
+# Keep canonical test fixtures (commit expected Move outputs)
+!packages/**/tests/fixtures/**/*.move
+
 # Local SQLite DBs and data files
 *.db
 packages/**/dev.db

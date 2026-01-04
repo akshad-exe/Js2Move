@@ -1,5 +1,10 @@
-{{#if isEntry}}
-{{> entry_function}}
-{{else}}
-{{> view_function}}
-{{/if}}
+{{visibility}} fun {{name}}(
+  {{#each params}}
+  {{name}}: {{#if isSigner}}&signer{{else}}{{type}}{{/if}}{{#unless @last}},{{/unless}}
+  {{/each}}
+){{#if returnType}}: {{returnType}}{{/if}}{{#if acquires.length}} acquires {{#each acquires}}{{this}}{{#unless @last}}, {{/unless}}{{/each}}{{/if}} {
+  {{#each statements}}
+  {{{code}}}
+  {{/each}}
+}
+  

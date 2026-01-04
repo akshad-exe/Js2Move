@@ -6,6 +6,7 @@ import Handlebars from 'handlebars';
 import * as fs from 'fs';
 import * as path from 'path';
 import { fileURLToPath } from 'url';
+import { formatMoveCode } from './format.js';
 import {
   ContractNode,
   ResourceDeclarationNode,
@@ -29,19 +30,38 @@ export class Generator {
   private template: HandlebarsTemplateDelegate;
 
   constructor() {
-    // Load main template
-    const templatePath = path.join(__dirname, '../templates/contract.move.hbs');
-    
-    if (fs.existsSync(templatePath)) {
-      const templateSource = fs.readFileSync(templatePath, 'utf-8');
-      this.template = Handlebars.compile(templateSource);
-    } else {
-      // Fallback inline template for development
-      this.template = Handlebars.compile(this.getDefaultTemplate());
+    // Register helpers first (partials may use helpers)
+    this.registerHelpers();
+
+    // Load and register templates/partials (support multiple .hbs files)
+    const templatesDir = path.join(__dirname, '../templates');
+
+    if (fs.existsSync(templatesDir)) {
+      const files = fs.readdirSync(templatesDir).filter(f => f.endsWith('.hbs'));
+
+      // Register each template as a partial (name variants: kebab, underscore, condensed)
+      for (const f of files) {
+        const filePath = path.join(templatesDir, f);
+        const source = fs.readFileSync(filePath, 'utf8');
+        const base = f.replace(/\.move\.hbs$/, '').replace(/\.hbs$/, '');
+        const underscored = base.replace(/-/g, '_');
+        const condensed = base.replace(/[-_]/g, '');
+
+        Handlebars.registerPartial(base, source);
+        if (underscored !== base) Handlebars.registerPartial(underscored, source);
+        if (condensed !== base && condensed !== underscored) Handlebars.registerPartial(condensed, source);
+      }
+
+      const mainTemplatePath = path.join(templatesDir, 'contract.move.hbs');
+      if (fs.existsSync(mainTemplatePath)) {
+        const templateSource = fs.readFileSync(mainTemplatePath, 'utf-8');
+        this.template = Handlebars.compile(templateSource);
+        return;
+      }
     }
 
-    // Register helpers
-    this.registerHelpers();
+    // Fallback inline template for development
+    this.template = Handlebars.compile(this.getDefaultTemplate());
   }
 
   /**
@@ -51,10 +71,8 @@ export class Generator {
     const data = this.astToTemplateData(ast);
     const code = this.template(data);
 
-    // Apply formatting if requested
-    const formattedCode = options?.format === 'pretty' 
-      ? this.formatCode(code, options.indentSize || 2)
-      : code;
+    // Format generated code using internal formatter
+    const formattedCode = formatMoveCode(code, options?.indentSize || 2);
 
     return {
       code: formattedCode,
@@ -81,8 +99,8 @@ export class Generator {
     return {
       moduleName: ast.name.name,
       imports: [
-        { module: '0x1::signer' },
-        { module: '0x1::vector' },
+        { module: 'std::signer' },
+        { module: 'std::vector' },
       ],
       structs,
       functions,
@@ -267,33 +285,8 @@ export class Generator {
     }
   }
 
-  /**
-   * Format generated code
-   */
-  private formatCode(code: string, indentSize: number): string {
-    const lines = code.split('\n');
-    let indent = 0;
-    const formatted: string[] = [];
+  // Formatting is handled by `format.ts` in this folder (formatMoveCode)
 
-    for (let line of lines) {
-      line = line.trim();
-      if (!line) continue;
-
-      // Decrease indent before closing braces
-      if (line.startsWith('}')) {
-        indent = Math.max(0, indent - indentSize);
-      }
-
-      formatted.push(' '.repeat(indent) + line);
-
-      // Increase indent after opening braces
-      if (line.endsWith('{')) {
-        indent += indentSize;
-      }
-    }
-
-    return formatted.join('\n');
-  }
 
   /**
    * Default template fallback

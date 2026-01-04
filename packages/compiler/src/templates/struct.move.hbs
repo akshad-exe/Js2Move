@@ -1,5 +1,6 @@
-struct {{name}} has key {
-{{#each fields}}
-{{this.name}}: {{{this.type}}},
-{{/each}}
+struct {{name}} has {{#each abilities}}{{this}}{{#unless @last}}, {{/unless}}{{/each}} {
+  {{#each fields}}
+  {{name}}: {{type}},
+  {{/each}}
 }
+

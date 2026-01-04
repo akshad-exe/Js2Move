@@ -1,16 +1,11 @@
-let prisma: any | undefined;
+import { PrismaClient } from '@prisma/client';
+
+let prisma: PrismaClient | undefined;
 
 async function initPrisma() {
   if (prisma) return prisma;
-  try {
-    const { PrismaClient } = await import('@prisma/client');
-    prisma = (global as any).prisma || new PrismaClient();
-    (global as any).prisma = prisma;
-    return prisma;
-  } catch (err) {
-    console.warn('@prisma/client not installed; database functions will throw until installed');
-    throw err;
-  }
+  prisma = new PrismaClient();
+  return prisma;
 }
 
 export async function connectWithRetry(retries = 5, delayMs = 2000) {
@@ -28,7 +23,7 @@ export async function connectWithRetry(retries = 5, delayMs = 2000) {
   }
 }
 
-export function getPrisma(): any {
+export function getPrisma(): PrismaClient {
   if (!prisma) throw new Error('Prisma client not initialized. Call connectWithRetry() first.');
   return prisma;
 }
@@ -36,3 +31,6 @@ export function getPrisma(): any {
 export function isDbConnected(): boolean {
   return !!prisma;
 }
+
+// Export the prisma instance getter for use in services
+export { getPrisma as prisma };

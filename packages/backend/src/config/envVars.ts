@@ -1,67 +1,75 @@
 import dotenv from 'dotenv';
+import path from 'node:path';
 import { z } from 'zod';
+import { logger } from './logger';
 
-// Load .env file early so zod sees values during parse
-dotenv.config();
+// Load .env from repo root so local dev envs are picked up predictably
+dotenv.config({ path: path.join(__dirname, '../../.env') });
 
-const envSchema = z.object({
-  NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
-  PORT: z.string().default('3001').transform((val) => parseInt(val, 10)),
+const EnvConfigSchema = z.object({
+  PORT: z.coerce
+    .number({
+      error: 'PORT must be a valid number',
+    })
+    .int()
+    .positive()
+    .default(3001),
+
+  NODE_ENV: z
+    .enum(['development', 'production', 'test'] as const, {
+      error: 'NODE_ENV must be one of: development, production, test',
+    })
+    .default('development'),
+
+  // Optional: not required for all environments (sqlite fallback, etc.)
   DATABASE_URL: z.string().optional(),
-  START_INDEXER: z.string().default('false').transform((v) => v === 'true'),
-  // Comma-separated list of allowed origins for CORS (e.g. https://app.example.com, http://localhost:3000)
+
+  // Feature flags
+  START_INDEXER: z
+    .enum(['true', 'false'] as const)
+    .transform((val) => val === 'true')
+    .default(false),
+
+  // CORS configuration
   CORS_ORIGINS: z.string().optional(),
-  // Whether to allow credentials (Access-Control-Allow-Credentials)
-  CORS_ALLOW_CREDENTIALS: z.string().default('false').transform((v) => v === 'true'),
-  // Preflight cache window in seconds
-  CORS_MAX_AGE: z.string().default(String(60 * 60 * 24)).transform((v) => parseInt(v, 10)),
+  CORS_ALLOW_CREDENTIALS: z.coerce.boolean().default(false),
+  CORS_MAX_AGE: z.coerce.number().int().nonnegative().default(60 * 60 * 24),
+
 });
 
-let parsedEnv;
-try {
-  parsedEnv = envSchema.parse(process.env);
-} catch (err: any) {
-  const details = err && err.errors
-    ? err.errors.map((e: any) => `${e.path.join('.')}: ${e.message}`).join('; ')
-    : (err && err.message) || String(err);
+export type EnvConfig = z.infer<typeof EnvConfigSchema>;
 
-  // Attempt to log the validation failure with the tagged logger; fall back to console.error
-  try {
-    const { taggedLogger } = require('@/config/logger');
-    const SYSTEM = taggedLogger('SYSTEM');
-    SYSTEM.error(`Environment validation failed: ${details}`);
-  } catch (logErr) {
-    console.error('[SYSTEM] Environment validation failed:', details);
+const rawConfig = {
+  PORT: process.env.PORT,
+  NODE_ENV: process.env.NODE_ENV,
+  DATABASE_URL: process.env.DATABASE_URL,
+  START_INDEXER: process.env.START_INDEXER,
+  CORS_ORIGINS: process.env.CORS_ORIGINS,
+  CORS_ALLOW_CREDENTIALS: process.env.CORS_ALLOW_CREDENTIALS,
+  CORS_MAX_AGE: process.env.CORS_MAX_AGE,
+};
+
+let envVars: EnvConfig;
+
+try {
+  envVars = EnvConfigSchema.parse(rawConfig);
+  logger.info('[SYSTEM] Environment configuration loaded.');
+} catch (error) {
+  if (error instanceof z.ZodError) {
+    logger.error('[SYSTEM] Environment configuration validation failed:', error.issues);
+    error.issues.forEach((err) => {
+      logger.error(`- ${err.path.join('.')}: ${err.message}`);
+    });
+  } else {
+    logger.error('Unknown error during environment config validation:', error);
   }
-
-  throw new Error(`Environment validation failed: ${details}`);
+  throw new Error('Environment configuration validation failed. Check environment variables.');
 }
 
-// Log immediately after envs are validated (use require to avoid import-order issues)
-try {
-  const { taggedLogger } = require('@/config/logger');
-  const SYSTEM = taggedLogger('SYSTEM');
-  SYSTEM.info('Environment configuration loaded.');
-} catch (err) {
-  // In test environments or where path aliases are not resolved yet, fall back to console
-  console.info('[SYSTEM] Environment configuration loaded.');
-}
+export const { PORT, NODE_ENV,  DATABASE_URL, START_INDEXER, CORS_MAX_AGE, CORS_ALLOW_CREDENTIALS, CORS_ORIGINS } = envVars;
 
-export const env = parsedEnv;
-
-export const PORT = env.PORT as number;
-export const NODE_ENV = env.NODE_ENV as string;
-export const DATABASE_URL = env.DATABASE_URL as string | undefined;
-export const START_INDEXER = env.START_INDEXER as boolean;
-
-export const CORS_ORIGINS = env.CORS_ORIGINS
-  ? (env.CORS_ORIGINS as string)
-      .split(',')
-      .map((s) => s.trim())
-      .filter(Boolean)
+export const CORS_ORIGINS_ARRAY = CORS_ORIGINS
+  ? CORS_ORIGINS.split(',').map((s) => s.trim()).filter(Boolean)
   : undefined;
 
-export const CORS_ALLOW_CREDENTIALS = env.CORS_ALLOW_CREDENTIALS as boolean;
-export const CORS_MAX_AGE = env.CORS_MAX_AGE as number;
-
-export default env;
+export default envVars;

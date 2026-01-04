@@ -76,20 +76,20 @@ export function Footer() {
                 </div>
 
                 {/* Bottom Bar Section */}
-                <div className="border-t border-white/5 pt-5 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-zinc-600">
+                <div className="border-t border-white/10 pt-6 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-zinc-400">
                     <div className="flex items-center gap-2">
                         <span>© 2025 MoveJS.</span>
-                        <span className="w-1 h-1 rounded-full bg-zinc-800" />
+                        <span className="w-1 h-1 rounded-full bg-zinc-600" />
                         <span>Open Source</span>
                     </div>
 
-                    <div className="flex items-center gap-2">
-                        <span>Built for</span>
+                    <div className="flex items-center gap-3">
+                        <span className="text-zinc-500">Built for</span>
                         <a
                             href="https://movementlabs.xyz"
                             target="_blank"
                             rel="noreferrer"
-                            className="bg-white/5 border border-white/10 px-3 py-1.5 rounded text-zinc-400 font-semibold hover:border-white/20 transition-colors"
+                            className="bg-gradient-to-r from-yellow-400/10 to-yellow-500/10 border border-yellow-400/30 px-4 py-2 rounded-lg text-yellow-400 font-semibold hover:bg-gradient-to-r hover:from-yellow-400/20 hover:to-yellow-500/20 hover:border-yellow-400/50 transition-all duration-300 shadow-lg shadow-yellow-400/10"
                         >
                             Movement Network
                         </a>

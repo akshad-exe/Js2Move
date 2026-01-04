@@ -67,23 +67,23 @@ const moveComparison = [
         language: "Solidity",
         pros: ["Mature ecosystem", "Large developer base", "Rich tooling"],
         cons: ["Reentrancy bugs", "Integer overflow risks", "Gas optimization complex"],
-        difficulty: 7,
-        adoption: 50,
+        difficulty: 6,
+        adoption: 70,
         color: "from-purple-500 to-pink-500"
     },
     {
         language: "Rust",
-        pros: ["Mature ecosystem", "Large developer base", "Rich tooling"],
-        cons: ["Reentrancy bugs", "Integer overflow risks", "Gas optimization complex"],
-        difficulty: 8,
-        adoption: 30,
+        pros: ["Memory safety", "Performance", "Zero-cost abstractions"],
+        cons: ["Steep learning curve", "Compilation time", "Less blockchain-specific tooling"],
+        difficulty: 9,
+        adoption: 20,
         color: "from-purple-500 to-pink-500"
     }, {
         language: "Move",
-        pros: ["Mature ecosystem", "Large developer base", "Rich tooling"],
-        cons: ["Reentrancy bugs", "Integer overflow risks", "Gas optimization complex"],
-        difficulty: 8,
-        adoption: 10,
+        pros: ["Built-in safety features", "Prevents common bugs", "Resource-oriented design"],
+        cons: ["Newer ecosystem", "Fewer tools", "Learning curve for paradigm"],
+        difficulty: 7,
+        adoption: 5,
         color: "from-purple-500 to-pink-500"
     },
 ];

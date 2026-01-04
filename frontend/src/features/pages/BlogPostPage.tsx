@@ -6,6 +6,7 @@ import { GravityStars } from "@/components/effects/GravityStars";
 import { motion, useScroll } from "framer-motion";
 import { ArrowLeft, Clock, Calendar, User, Share2 } from "lucide-react";
 import { useRef, useState } from "react";
+import { createElement } from "react";
 
 export function BlogPostPage() {
     const { slug } = useParams();
@@ -127,7 +128,7 @@ export function BlogPostPage() {
                             prose-pre:bg-[#050505] prose-pre:border prose-pre:border-white/10 prose-pre:rounded-2xl prose-pre:shadow-2xl prose-pre:p-6 prose-pre:my-8
                             prose-img:rounded-3xl prose-img:border prose-img:border-white/10 prose-img:shadow-2xl prose-img:my-10"
                         >
-                            <div dangerouslySetInnerHTML={{ __html: post.content || '' }} />
+                            {createElement(post.content)}
                         </div>
 
                         {/* Share Footer */}

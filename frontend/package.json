@@ -1,6 +1,6 @@
 {
-  "name": "@js2move/frontend",  
-  "description": "Js2Move project frontend (web playground) — part of monorepo, not a standalone package",  
+  "name": "@js2move/frontend",
+  "description": "Js2Move project frontend (web playground) — part of monorepo, not a standalone package",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -23,31 +23,31 @@
     "clsx": "^2.1.1",
     "framer-motion": "^12.23.26",
     "lucide-react": "^0.562.0",
+    "monaco-editor": "^0.39.0",
     "motion": "^12.23.26",
     "ogl": "^1.0.11",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-router-dom": "^7.11.0",
     "sonner": "^2.0.7",
-    "tailwind-merge": "^3.4.0",
-    "monaco-editor": "^0.39.0"
+    "tailwind-merge": "^3.4.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
     "@types/node": "^24.10.1",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
+    "@typescript-eslint/eslint-plugin": "^6.8.0",
+    "@typescript-eslint/parser": "^6.8.0",
     "@vitejs/plugin-react": "^5.1.1",
     "autoprefixer": "^10.4.23",
     "eslint": "^9.39.1",
-    "@typescript-eslint/parser": "^6.8.0",
-    "@typescript-eslint/eslint-plugin": "^6.8.0",
     "eslint-plugin-react": "^7.32.2",
     "eslint-plugin-react-hooks": "^7.0.1",
     "postcss": "^8.5.6",
+    "prettier": "^2.8.8",
     "tailwindcss": "^3.4.19",
     "typescript": "~5.9.3",
-    "prettier": "^2.8.8",
     "vite": "^7.2.4"
   }
 }

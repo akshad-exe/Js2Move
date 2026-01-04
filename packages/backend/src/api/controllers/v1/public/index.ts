@@ -1,7 +1,13 @@
 import { compilerController } from './compiler.controller';
-import { exampleController } from './example.controller';
+import { gasController } from './gas.controller';
+import { deploymentController } from './deployment.controller';
+import { blockchainController } from './blockchain.controller';
+import { examplesController } from './examples.controller';
 
 export const publicControllers = {
   compilerController,
-  exampleController,
+  gasController,
+  deploymentController,
+  blockchainController,
+  examplesController,
 };

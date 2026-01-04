@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
+import toast from "react-hot-toast";
 import { GravityStars } from "@/components/effects/GravityStars";
 import { Navbar } from "@/components/shared/Navbar";
 import { useTheme } from "@/lib/theme/ThemeProvider";
@@ -8,27 +9,17 @@ import OutputPanel from "./components/OutputPanel";
 import Toolbar from "./components/Toolbar";
 import { Sidebar } from "./Sidebar";
 import { DEFAULT_MOVEJS_CODE } from "./utils/defaultCode";
+import { useCompiler } from "@/hooks";
 
 export function PlaygroundPage() {
   const { theme } = useTheme();
   const [code, setCode] = useState(DEFAULT_MOVEJS_CODE);
-  const [output, setOutput] = useState("");
-  const [isCompiling, setIsCompiling] = useState(false);
-  const [error, setError] = useState("");
+  const { compile, isCompiling, output, error, setOutput, setError } = useCompiler();
 
   const handleCompile = async () => {
-    setIsCompiling(true);
-    setError("");
-
-    try {
-      // TODO: Replace with actual MoveJS compiler API call
-      setTimeout(() => {
-        setOutput(`// Compiled Move Code\nmodule counter {\n  struct Counter has key {\n    value: u64\n  }\n}`);
-        setIsCompiling(false);
-      }, 1000);
-    } catch (err) {
-      setError("Compilation failed");
-      setIsCompiling(false);
+    const result = await compile(code);
+    if (result?.success) {
+      toast.success('Compilation successful!');
     }
   };
 
@@ -36,16 +27,22 @@ export function PlaygroundPage() {
     setCode(DEFAULT_MOVEJS_CODE);
     setOutput("");
     setError("");
+    toast.success('Reset to default code');
   };
 
   const handleDownload = () => {
-    const blob = new Blob([output || code], { type: "text/plain" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "code.move";
-    a.click();
-    URL.revokeObjectURL(url);
+    try {
+      const blob = new Blob([output || code], { type: "text/plain" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "code.move";
+      a.click();
+      URL.revokeObjectURL(url);
+      toast.success('Code downloaded!');
+    } catch (err) {
+      toast.error('Failed to download file');
+    }
   };
 
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(true);

@@ -1,4 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
+import toast from "react-hot-toast";
 import {
     Calendar,
     Clock,
@@ -30,11 +31,17 @@ export function BlogPage() {
         post.category.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-    const handleNewsletterSubmit = (e: React.FormEvent) => {
+    const handleNewsletterSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (email) {
-            alert(`Thank you for subscribing with ${email}!`);
+        if (!email) {
+            toast.error('Please enter your email');
+            return;
+        }
+        try {
+            toast.success(`Welcome! Check ${email} for confirmation`);
             setEmail('');
+        } catch (err) {
+            toast.error('Failed to subscribe. Try again later.');
         }
     };
 

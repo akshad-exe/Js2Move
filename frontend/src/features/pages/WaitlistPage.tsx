@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import toast from "react-hot-toast";
 import { useState } from "react";
 import { Navbar } from "@/components/shared/Navbar";
 import { Footer } from "@/components/shared/Footer";
@@ -12,11 +13,23 @@ export function WaitlistPage() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (!email) {
+            toast.error('Please enter your email');
+            return;
+        }
+        
         setStatus("loading");
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        setStatus("success");
-        setEmail("");
+        try {
+            // Simulate API call
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            setStatus("success");
+            toast.success('You\'re on the waitlist! 🎉');
+            setEmail("");
+            setTimeout(() => setStatus("idle"), 3000);
+        } catch (err) {
+            toast.error('Failed to join waitlist. Please try again.');
+            setStatus("idle");
+        }
     };
 
     return (

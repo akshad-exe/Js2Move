@@ -1,3 +1,5 @@
+import toast from 'react-hot-toast';
+
 export interface CompileResult {
   success: boolean;
   output?: string;
@@ -23,15 +25,19 @@ export async function compileCode(code: string): Promise<CompileResult> {
         output: data.output,
       };
     } else {
+      const errorMsg = data.error || 'Compilation failed';
+      toast.error(errorMsg);
       return {
         success: false,
-        error: data.error || 'Compilation failed',
+        error: errorMsg,
       };
     }
   } catch (error) {
+    const errorMsg = error instanceof Error ? error.message : 'Network error. Please check your connection.';
+    toast.error(errorMsg);
     return {
       success: false,
-      error: 'Network error. Please check your connection.',
+      error: errorMsg,
     };
   }
 }

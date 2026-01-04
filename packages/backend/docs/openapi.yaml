@@ -1,0 +1,125 @@
+openapi: 3.0.3
+info:
+  title: Js2Move Backend API
+  version: 0.1.0
+  description: Public and admin API for compiling and deploying MoveJS contracts
+servers:
+  - url: http://localhost:3001/api/v1
+paths:
+  /compiler/compile:
+    post:
+      tags: [Compiler]
+      summary: Compile MoveJS source to Move
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CompileRequest'
+      responses:
+        '200':
+          description: Successful compile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CompileResponse'
+  /gas/estimate:
+    post:
+      tags: [Gas]
+      summary: Estimate gas for deployment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GasEstimateRequest'
+      responses:
+        '200':
+          description: Gas estimate
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GasEstimateResponse'
+  /deploy:
+    post:
+      tags: [Deployment]
+      summary: Deploy a MoveJS contract
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeployRequest'
+      responses:
+        '200':
+          description: Deployment response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeployResponse'
+components:
+  schemas:
+    CompileRequest:
+      type: object
+      required: [source]
+      properties:
+        source:
+          type: string
+    CompileResponse:
+      type: object
+      properties:
+        move:
+          type: string
+    GasEstimateRequest:
+      type: object
+      required: [source, network]
+      properties:
+        source:
+          type: string
+        network:
+          type: string
+          enum: [testnet, mainnet]
+    GasEstimateResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        estimate:
+          type: object
+          properties:
+            gasUnits:
+              type: integer
+            maxGasUnits:
+              type: integer
+            gasUnitPrice:
+              type: integer
+            totalCostOctas:
+              type: integer
+            totalCostAPT:
+              type: number
+    DeployRequest:
+      type: object
+      required: [source, network]
+      properties:
+        source:
+          type: string
+        network:
+          type: string
+          enum: [testnet, mainnet]
+        moduleName:
+          type: string
+        gasLimit:
+          type: integer
+    DeployResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        deploymentId:
+          type: string
+        address:
+          type: string
+        txHash:
+          type: string
+        gasUsed:
+          type: integer

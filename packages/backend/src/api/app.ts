@@ -1,15 +1,15 @@
 import express from 'express';
 import router from '@/api/routes';
 import { requestLogger } from '@/config/logger';
+import { isDbConnected } from '@/config/database';
 import logger from '@/config/logger';
+import { CORS_ORIGINS, CORS_ALLOW_CREDENTIALS, CORS_MAX_AGE } from '@/config/envVars';
 import { errorConverter, errorHandler } from '@/handlers/error.handler';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import cors from 'cors';
-import { isDbConnected } from '@/config/database';
 import { readCheckpoint } from '@/indexer/checkpoints';
 import listEndpoints from 'express-list-endpoints';
-import { CORS_ORIGINS, CORS_ALLOW_CREDENTIALS, CORS_MAX_AGE } from '@/config/envVars';
 
 const app = express();
 app.use(express.json());
@@ -67,6 +67,40 @@ app.get('/health', async (_req, res) => {
     timestamp: new Date().toISOString(),
   });
 });
+
+// Swagger UI for API docs (development only)
+if (process.env.NODE_ENV === 'development') {
+  try {
+    const swaggerUi = require('swagger-ui-express');
+    const swaggerJsdoc = require('swagger-jsdoc');
+    
+    // Auto-generate OpenAPI spec from JSDoc comments in routes
+    const options = {
+      definition: {
+        openapi: '3.0.0',
+        info: {
+          title: 'Js2Move API',
+          version: '1.0.0',
+          description: 'Smart contract compilation and deployment API for Move language',
+        },
+        servers: [
+          {
+            url: 'http://localhost:8000',
+            description: 'Development server',
+          },
+        ],
+      },
+      apis: ['./src/api/routes/**/*.ts', './src/api/controllers/**/*.ts'],
+    };
+    
+    const spec = swaggerJsdoc(options);
+    const port = process.env.PORT || 8000;
+    app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(spec));
+    logger.info(`Swagger UI available at http://localhost:${port}/api/docs`);
+  } catch (err) {
+    logger.warn('Swagger UI not available', err);
+  }
+}
 
 // Replace custom endpoint lister with express-list-endpoints in development only
 if (process.env.NODE_ENV === 'development') {

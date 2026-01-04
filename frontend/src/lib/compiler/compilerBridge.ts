@@ -1,23 +1,31 @@
-// TODO: Replace this with actual compiler from ../../../compiler/src/index.ts
+import { apiClient } from '@/lib/api/axiosClient';
+import toast from 'react-hot-toast';
+
 export async function compileMoveJS(source: string): Promise<{
     success: boolean;
     output: string;
     logs: string[];
 }> {
-    // MOCK IMPLEMENTATION
-    await new Promise(resolve => setTimeout(resolve, 500));
+    try {
+        const response = await apiClient.post('/compiler/compile', {
+            source,
+        });
 
-    if (!source.includes('contract')) {
+        if (response.data.success) {
+            toast.success('Compilation successful!');
+        }
+
+        return {
+            success: response.data.success,
+            output: response.data.output || '',
+            logs: response.data.logs || [],
+        };
+    } catch (error) {
+        toast.error('Compilation failed. Please try again.');
         return {
             success: false,
             output: '',
-            logs: ['Error: No contract definition found']
+            logs: ['Compilation error occurred'],
         };
     }
-
-    return {
-        success: true,
-        output: `module 0x1::GeneratedContract {\n  // Generated Move code\n  public entry fun transfer() {\n    // TODO: Implement\n  }\n}`,
-        logs: ['Compilation successful', 'Generated 1 module']
-    };
 }

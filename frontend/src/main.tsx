@@ -3,6 +3,10 @@ import ReactDOM from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
 import { ThemeProvider } from './lib/theme/ThemeProvider'
+import { measurePageLoad } from './lib/utils/performance'
+
+// Start performance monitoring
+measurePageLoad()
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>

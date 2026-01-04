@@ -1,24 +1,19 @@
-import { readCheckpoint, writeCheckpoint } from './checkpoints';
+import { startDeploymentTracker } from './deployment-tracker';
 
+export { startDeploymentTracker };
+export { readCheckpoint, writeCheckpoint } from './checkpoints';
+
+/**
+ * Main indexer bootstrap
+ * Starts all indexer workers (deployment tracker, event listeners, etc)
+ */
 export async function startIndexer() {
-  console.log('Indexer starting (stub)');
-
-  // Example loop: read checkpoint, pretend to process next block, write checkpoint.
-  const checkpoint = await readCheckpoint();
-  let block = checkpoint.lastIndexedBlock ?? 0;
-  console.log('Starting from block', block);
-
-  // simple example: advance block number every 5 seconds (demo only)
-  setInterval(async () => {
-    block += 1;
-    console.log('Processed block', block);
-    await writeCheckpoint({ lastIndexedBlock: block });
-  }, 5000);
+  await startDeploymentTracker();
 }
 
 if (require.main === module) {
   startIndexer().catch((err) => {
-    console.error(err);
+    console.error('Indexer failed:', err);
     process.exit(1);
   });
 }

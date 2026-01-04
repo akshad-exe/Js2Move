@@ -3,9 +3,10 @@
  */
 import { test } from 'node:test';
 import assert from 'node:assert';
+import Handlebars from 'handlebars';
 import { tokenize } from '../dist/lexer/lexer.js';
 import { parse } from '../dist/parser/parser.js';
-import { generate } from '../dist/generator/generator.js';
+import { generate, Generator } from '../dist/generator/generator.js';
 
 test('Generator: should generate valid Move module', () => {
   const source = 'contract Test { resource R { v: u64 }; }';
@@ -39,6 +40,25 @@ test('Generator: should use Handlebars template', () => {
   assert(result.code.includes('module Token'));
   assert(result.code.includes('use std::signer'));
   assert(result.code.includes('struct Balance has key, store'));
+});
+
+// Ensure generator registers templates as partials and uses them when rendering
+
+test('Generator: registers partials and uses them', () => {
+  const g = new Generator();
+  const partials = Object.keys(Handlebars.partials || {});
+
+  assert(partials.includes('struct') || partials.includes('struct_move') || partials.includes('structmove'));
+  assert(partials.includes('function'));
+  assert(partials.includes('imports'));
+
+  const source = 'contract Token { resource Balance { amount: u64 }; }';
+  const tokens = tokenize(source).tokens;
+  const ast = parse(tokens).ast;
+  const result = g.generate(ast);
+
+  assert(result.code.includes('use std::signer'));
+  assert(result.code.includes('struct Balance'));
 });
 
 test('Generator: should format code with options', () => {

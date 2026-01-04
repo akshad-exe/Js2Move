@@ -6,10 +6,9 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "tsc -p tsconfig.json",
+    "build": "tsc -p tsconfig.json && node scripts/copy-templates.js",
     "build:out": "node scripts/build-out.js",
     "clean": "rimraf dist",
-    "test": "node --test",
     "test:fixtures": "node --test tests/fixtures.test.js",
     "test:unit": "node --test tests/*.test.js",
     "test:integration:aptos": "node --test tests/integration/aptos/compile.test.js",
@@ -26,5 +25,5 @@
     "@types/node": "^18.19.130",
     "ts-node": "^10.9.2",
     "typescript": "^5.2.0"
-  },
+  }
 }

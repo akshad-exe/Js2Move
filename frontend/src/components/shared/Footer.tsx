@@ -114,7 +114,7 @@ function FooterLink({ to, children }: { to: string; children: React.ReactNode })
 }
 
 // Helper for Social Icons
-function SocialIcon({ href, icon: Icon, label }: { href: string; icon: any; label: string }) {
+function SocialIcon({ href, icon: Icon, label }: { href: string; icon: React.ComponentType<React.SVGProps<SVGSVGElement>>; label: string }) {
     return (
         <a
             href={href}

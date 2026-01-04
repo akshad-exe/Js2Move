@@ -7,7 +7,27 @@ import { GravityStars } from "@/components/effects/GravityStars";
 import LightRays from "@/components/effects/LightRays";
 import { GlowingEffect } from "@/components/ui/glowing-effect";
 
-const teamMembers = [
+type TeamMember = {
+    name: string;
+    role: string;
+    handle: string;
+    location: string;
+    bio: string;
+    gradient: string;
+    image?: string;
+    imageScale?: string;
+    imagePosition?: string;
+    icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+    skills: string[];
+    social: {
+        twitter?: string;
+        github?: string;
+        linkedin?: string;
+        email?: string;
+    };
+};
+
+const teamMembers: TeamMember[] = [
     {
         name: "Gourav Mishra",
         role: "Fullstack Lead",
@@ -165,7 +185,7 @@ export function TeamPage() {
                                                 <img
                                                     src={member.image}
                                                     alt={member.name}
-                                                    className={`w-full h-full object-cover ${(member as any).imagePosition || 'object-top'} ${(member as any).imageScale || ''} transition-transform duration-500`}
+                                                    className={`w-full h-full object-cover ${member.imagePosition ?? 'object-top'} ${member.imageScale ?? ''} transition-transform duration-500`}
                                                 />
                                             ) : (
                                                 <member.icon className="w-12 h-12" strokeWidth={1.5} />

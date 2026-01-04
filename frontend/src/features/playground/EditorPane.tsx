@@ -3,6 +3,7 @@ import { useTheme } from "@/lib/theme/ThemeProvider";
 import { movejsLanguageConfig } from "./monaco/movejsLanguage";
 import { useEffect, useRef } from "react";
 
+// Monaco type from @monaco-editor/react wrapper - types available at runtime via onMount
 type EditorPaneProps = {
     value: string;
     onChange: (value: string) => void;
@@ -10,7 +11,7 @@ type EditorPaneProps = {
 
 export function EditorPane({ value, onChange }: EditorPaneProps) {
     const { theme } = useTheme();
-    const editorRef = useRef<any>(null);
+    const editorRef = useRef<any>(undefined);
 
     useEffect(() => {
         // Register custom language when Monaco loads

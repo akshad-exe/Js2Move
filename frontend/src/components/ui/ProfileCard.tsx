@@ -44,11 +44,11 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
     const shellRef = useRef<HTMLDivElement>(null);
     const [isHovered, setIsHovered] = useState(false);
 
-    const enterTimerRef = useRef<number | null>(null);
-    const leaveRafRef = useRef<number | null>(null);
+    const enterTimerRef = useRef<number | undefined>(undefined);
+    const leaveRafRef = useRef<number | undefined>(undefined);
 
     const tiltEngine = useMemo(() => {
-        let rafId: number | null = null;
+        let rafId: number | undefined = undefined;
         let running = false;
         let lastTs = 0;
 
@@ -111,9 +111,9 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
             } else {
                 running = false;
                 lastTs = 0;
-                if (rafId) {
+                if (rafId !== undefined) {
                     cancelAnimationFrame(rafId);
-                    rafId = null;
+                    rafId = undefined;
                 }
             }
         };
@@ -149,8 +149,8 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
                 return { x: currentX, y: currentY, tx: targetX, ty: targetY };
             },
             cancel() {
-                if (rafId) cancelAnimationFrame(rafId);
-                rafId = null;
+                if (rafId !== undefined) cancelAnimationFrame(rafId);
+                rafId = undefined;
                 running = false;
                 lastTs = 0;
             }
@@ -203,12 +203,12 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
             const settled = Math.hypot(tx - x, ty - y) < 0.6;
             if (settled) {
                 shell.classList.remove('active');
-                leaveRafRef.current = null;
+                leaveRafRef.current = undefined;
             } else {
                 leaveRafRef.current = requestAnimationFrame(checkSettle);
             }
         };
-        if (leaveRafRef.current) cancelAnimationFrame(leaveRafRef.current);
+            if (leaveRafRef.current !== undefined) cancelAnimationFrame(leaveRafRef.current);
         leaveRafRef.current = requestAnimationFrame(checkSettle);
     }, [tiltEngine]);
 

@@ -1,6 +1,5 @@
 import { useRef } from "react";
 import Editor, { type OnMount } from "@monaco-editor/react";
-import * as monaco from "monaco-editor";
 
 interface CodeEditorProps {
   value: string;
@@ -10,14 +9,16 @@ interface CodeEditorProps {
 }
 
 export default function CodeEditor({ value, onChange, language, theme }: CodeEditorProps) {
-  const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
+  const editorRef = useRef<any>(undefined);
 
-  const handleEditorDidMount: OnMount = (editor) => {
+  const handleEditorDidMount: OnMount = (editor, monaco) => {
     editorRef.current = editor;
+
+    if (!monaco) return;
 
     // Only register language if it's not already registered
     const langs = monaco.languages.getLanguages();
-    if (!langs.some((l) => l.id === "movejs")) {
+    if (!langs.some((l: { id?: string }) => l.id === "movejs")) {
       monaco.languages.register({ id: "movejs" });
 
       monaco.languages.setMonarchTokensProvider("movejs", {

@@ -3,7 +3,7 @@ import { blogPosts } from "@/data/blogPosts";
 import { Navbar } from "@/components/shared/Navbar";
 import { Footer } from "@/components/shared/Footer";
 import { GravityStars } from "@/components/effects/GravityStars";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion, useScroll } from "framer-motion";
 import { ArrowLeft, Clock, Calendar, User, Share2 } from "lucide-react";
 import { useRef, useState } from "react";
 
@@ -17,10 +17,6 @@ export function BlogPostPage() {
     if (!post) {
         return <Navigate to="/blog" replace />;
     }
-
-    const heroScale = useTransform(scrollYProgress, [0, 0.2], [1, 1.1]);
-    const heroOpacity = useTransform(scrollYProgress, [0, 0.3], [1, 0]);
-    const contentY = useTransform(scrollYProgress, [0, 0.2], [0, -40]);
 
     const handleShare = () => {
         navigator.clipboard.writeText(window.location.href);

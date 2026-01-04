@@ -44,7 +44,7 @@ export function useWallet() {
         connect: connectWallet,
         disconnect: disconnectWallet,
         address: account?.address,
-        formattedAddress: account?.address ? formatAddress(account.address.toString()) : null,
+        formattedAddress: account?.address ? formatAddress(account.address.toString()) : undefined,
         isConnected: connected,
         walletName: wallet?.name,
         hasWallet: wallets && wallets.length > 0

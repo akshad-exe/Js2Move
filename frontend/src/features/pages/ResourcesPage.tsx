@@ -109,13 +109,13 @@ contract Bridge {
 ];
 
 export function ResourcesPage() {
-    const [copied, setCopied] = useState<number | null>(null);
+    const [copied, setCopied] = useState<number | undefined>(undefined);
     const [activeTab, setActiveTab] = useState<'starters' | 'templates'>('starters');
 
     const handleCopy = (text: string, index: number) => {
         navigator.clipboard.writeText(text);
         setCopied(index);
-        setTimeout(() => setCopied(null), 2000);
+        setTimeout(() => setCopied(undefined), 2000);
     };
 
     return (

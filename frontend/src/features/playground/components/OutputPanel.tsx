@@ -1,7 +1,6 @@
 import { Loader2, CheckCircle2, XCircle } from "lucide-react";
 import Editor, { type OnMount } from "@monaco-editor/react";
 import { useRef } from "react";
-import * as monaco from "monaco-editor";
 
 interface OutputPanelProps {
   output: string;
@@ -11,13 +10,15 @@ interface OutputPanelProps {
 }
 
 export default function OutputPanel({ output, error, isCompiling, theme }: OutputPanelProps) {
-  const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
+  const editorRef = useRef<any>(undefined);
 
-  const handleEditorDidMount: OnMount = (editor) => {
+  const handleEditorDidMount: OnMount = (editor, monaco) => {
     editorRef.current = editor;
 
+    if (!monaco) return;
+
     const langs = monaco.languages.getLanguages();
-    if (!langs.some((l) => l.id === "move")) {
+    if (!langs.some((l: { id?: string }) => l.id === "move")) {
       monaco.languages.register({ id: "move" });
 
       monaco.languages.setMonarchTokensProvider("move", {

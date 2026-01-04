@@ -77,7 +77,7 @@ export function Navbar() {
                         {/* I'm using the RazorWalletButton here to handle connections */}
                         <RazorWalletButton
                             isConnected={isConnected}
-                            address={address}
+                            address={address ? address.toString() : undefined}
                             formattedAddress={formattedAddress}
                             hasWallet={hasWallet}
                             onConnect={connect}
@@ -150,6 +150,17 @@ export function Navbar() {
 
 // I've split out some helper components here to keep the main Navbar clean
 
+type RazorWalletButtonProps = {
+    isConnected: boolean;
+    address?: string | undefined;
+    formattedAddress?: string | undefined;
+    hasWallet: boolean;
+    onConnect: () => void;
+    onDisconnect: () => void;
+    onCopy: () => void;
+    copied: boolean;
+};
+
 function RazorWalletButton({
     isConnected,
     address,
@@ -159,7 +170,7 @@ function RazorWalletButton({
     onDisconnect,
     onCopy,
     copied
-}: any) {
+}: RazorWalletButtonProps) {
     const [showDropdown, setShowDropdown] = useState(false);
 
     // This is what we show when the user is already connected

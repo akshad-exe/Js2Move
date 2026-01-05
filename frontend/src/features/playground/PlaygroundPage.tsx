@@ -7,26 +7,65 @@ import { useTheme } from "@/lib/theme/ThemeProvider";
 import CodeEditor from "./components/CodeEditor";
 import OutputPanel from "./components/OutputPanel";
 import Toolbar from "./components/Toolbar";
+import GasPanel from "./components/GasPanel";
+import ValidationPanel from "./components/ValidationPanel";
 import { Sidebar } from "./Sidebar";
 import { DEFAULT_MOVEJS_CODE } from "./utils/defaultCode";
 import { useCompiler } from "@/hooks";
 
+type OutputTab = "compile" | "validation" | "gas";
+
 export function PlaygroundPage() {
   const { theme } = useTheme();
   const [code, setCode] = useState(DEFAULT_MOVEJS_CODE);
-  const { compile, isCompiling, output, error, setOutput, setError } = useCompiler();
+  const [outputTab, setOutputTab] = useState<OutputTab>("compile");
+  const { compile, isCompiling, output, error, setOutput, setError, validate, isValidating, analyze, isAnalyzing } = useCompiler();
+  const [validationOutput, setValidationOutput] = useState("");
 
   const handleCompile = async () => {
     const result = await compile(code);
     if (result?.success) {
+      setOutputTab("compile");
       toast.success('Compilation successful!');
     }
+  };
+
+  const handleValidate = async () => {
+    try {
+      const result = await validate(code);
+      if (result) {
+        setValidationOutput(JSON.stringify(result, null, 2));
+        setOutputTab("validation");
+        toast.success('Validation complete!');
+      }
+    } catch (err) {
+      toast.error('Validation failed');
+    }
+  };
+
+  const handleAnalyze = async () => {
+    try {
+      const result = await analyze(code);
+      if (result) {
+        setValidationOutput(JSON.stringify(result, null, 2));
+        setOutputTab("validation");
+        toast.success('Analysis complete!');
+      }
+    } catch (err) {
+      toast.error('Analysis failed');
+    }
+  };
+
+  const handleEstimateGas = async () => {
+    setOutputTab("gas");
+    // Gas estimation will be handled in GasPanel component
   };
 
   const handleReset = () => {
     setCode(DEFAULT_MOVEJS_CODE);
     setOutput("");
     setError("");
+    setValidationOutput("");
     toast.success('Reset to default code');
   };
 
@@ -61,12 +100,17 @@ export function PlaygroundPage() {
         <Navbar />
 
         <div className="h-screen flex flex-col" style={{ paddingTop: "4rem" }}>
-          {/* Toolbar */}
+          {/* Toolbar - Now with Validate & Analyze buttons */}
           <Toolbar
             onCompile={handleCompile}
+            onValidate={handleValidate}
+            onAnalyze={handleAnalyze}
+            onEstimateGas={handleEstimateGas}
             onReset={handleReset}
             onDownload={handleDownload}
             isCompiling={isCompiling}
+            isValidating={isValidating}
+            isAnalyzing={isAnalyzing}
             onToggleSidebar={() => setSidebarOpen((s) => !s)}
           />
 
@@ -81,6 +125,7 @@ export function PlaygroundPage() {
                   onOpenExample={(exampleCode) => {
                     setCode(exampleCode);
                     setOutput("");
+                    setValidationOutput("");
                   }}
                 />
               </div>
@@ -94,17 +139,19 @@ export function PlaygroundPage() {
                   <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    className="h-full rounded-lg overflow-hidden border border-border/50 bg-white/40 dark:bg-white/5 backdrop-blur-sm"
+                    className="h-full rounded-lg overflow-hidden border border-border/50 bg-white/40 dark:bg-white/5 backdrop-blur-sm flex flex-col"
                   >
                     <div className="px-4 py-3 border-b border-border/50 bg-white/60 dark:bg-white/10">
                       <h3 className="font-semibold text-sm">MoveJS Code</h3>
                     </div>
-                    <CodeEditor
-                      value={code}
-                      onChange={(value) => setCode(value || "")}
-                      language="movejs"
-                      theme={theme === "dark" ? "vs-dark" : "light"}
-                    />
+                    <div className="flex-1 overflow-hidden">
+                      <CodeEditor
+                        value={code}
+                        onChange={(value) => setCode(value || "")}
+                        language="movejs"
+                        theme={theme === "dark" ? "vs-dark" : "light"}
+                      />
+                    </div>
                   </motion.div>
                 </div>
 
@@ -113,14 +160,51 @@ export function PlaygroundPage() {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.1 }}
-                    className="h-full"
+                    className="h-full flex flex-col"
                   >
-                    <OutputPanel
-                      output={output}
-                      error={error}
-                      isCompiling={isCompiling}
-                      theme={theme}
-                    />
+                    {/* Tab Headers */}
+                    <div className="flex gap-2 mb-2 border-b border-border/50">
+                      <TabButton
+                        active={outputTab === "compile"}
+                        onClick={() => setOutputTab("compile")}
+                        label="Output"
+                      />
+                      <TabButton
+                        active={outputTab === "validation"}
+                        onClick={() => setOutputTab("validation")}
+                        label="Validation"
+                      />
+                      <TabButton
+                        active={outputTab === "gas"}
+                        onClick={() => setOutputTab("gas")}
+                        label="Gas"
+                      />
+                    </div>
+
+                    {/* Tab Content */}
+                    <div className="flex-1 overflow-hidden">
+                      {outputTab === "compile" && (
+                        <OutputPanel
+                          output={output}
+                          error={error}
+                          isCompiling={isCompiling}
+                          theme={theme}
+                        />
+                      )}
+                      {outputTab === "validation" && (
+                        <ValidationPanel
+                          content={validationOutput}
+                          isLoading={isValidating || isAnalyzing}
+                          theme={theme}
+                        />
+                      )}
+                      {outputTab === "gas" && (
+                        <GasPanel
+                          code={code}
+                          theme={theme}
+                        />
+                      )}
+                    </div>
                   </motion.div>
                 </div>
               </div>
@@ -134,6 +218,23 @@ export function PlaygroundPage() {
         </div>
       </div>
     </>
+  );
+}
+
+function TabButton({ active, onClick, label }: { active: boolean; onClick: () => void; label: string }) {
+  return (
+    <motion.button
+      onClick={onClick}
+      className={`px-4 py-2 text-sm font-medium transition-colors ${
+        active
+          ? "text-purple-500 border-b-2 border-purple-500"
+          : "text-muted-foreground hover:text-foreground"
+      }`}
+      whileHover={{ scale: 1.05 }}
+      whileTap={{ scale: 0.95 }}
+    >
+      {label}
+    </motion.button>
   );
 }
 

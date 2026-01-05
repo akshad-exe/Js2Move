@@ -4,20 +4,19 @@ import {
     Coins,
     Image as ImageIcon,
     Gamepad2,
-    Copy,
-    Check,
     Code2,
     Rocket,
-    Shield,
-    Sparkles,
     ExternalLink,
-    Layers
+    Layers,
+    BookOpen,
 } from "lucide-react";
 import { useState } from "react";
 import { Navbar } from "@/components/shared/Navbar";
 import { Footer } from "@/components/shared/Footer";
 import { GravityStars } from "@/components/effects/GravityStars";
 import LightRays from "@/components/effects/LightRays";
+import { TemplatesPanel } from "../../components/TemplatesPanel";
+import { ExamplesPanel } from "../../components/ExamplesPanel";
 
 // Thumbnails (using generated assets)
 const defiThumb = "/defi_starter_thumbnail_1767290305629.png";
@@ -54,69 +53,8 @@ const starters = [
     }
 ];
 
-const templates = [
-    {
-        title: "Global Storage Pattern",
-        category: "Architecture",
-        icon: Layers,
-        code: `// Define a persistent storage resource
-contract Vault {
-  resource Data;
-
-  init(signer: address, val: u64) {
-    Data[signer] = val;
-  }
-}`
-    },
-    {
-        title: "Access Control Layer",
-        category: "Security",
-        icon: Shield,
-        code: `// Secure capability pattern
-contract AdminOnly {
-  resource AdminCap;
-
-  only_admin(signer: signer) {
-    assert(has_resource<AdminCap>(signer), 401);
-  }
-}`
-    },
-    {
-        title: "Fungible Token Logic",
-        category: "DeFi",
-        icon: Coins,
-        code: `// Basic coin logic
-contract Token {
-  resource Balance;
-
-  transfer(from: signer, to: address, amount: u64) {
-    Balance[from] -= amount;
-    Balance[to] += amount;
-  }
-}`
-    },
-    {
-        title: "Event Emission",
-        category: "Communication",
-        icon: Sparkles,
-        code: `// Notify listeners of state changes
-contract Bridge {
-  emit_transfer(from: address, to: address, val: u64) {
-    emit TransferEvent { from, to, val };
-  }
-}`
-    }
-];
-
 export function ResourcesPage() {
-    const [copied, setCopied] = useState<number | undefined>(undefined);
-    const [activeTab, setActiveTab] = useState<'starters' | 'templates'>('starters');
-
-    const handleCopy = (text: string, index: number) => {
-        navigator.clipboard.writeText(text);
-        setCopied(index);
-        setTimeout(() => setCopied(undefined), 2000);
-    };
+    const [activeTab, setActiveTab] = useState<'starters' | 'templates' | 'examples'>('starters');
 
     return (
         <div className="min-h-screen text-foreground overflow-x-hidden relative">
@@ -185,6 +123,15 @@ export function ResourcesPage() {
                             >
                                 <Code2 className={`w-4 h-4 ${activeTab === 'templates' ? 'text-white' : 'text-gray-500'}`} />
                                 <span className="text-xs uppercase tracking-widest">Templates</span>
+                            </button>
+                            <button
+                                onClick={() => setActiveTab('examples')}
+                                className={`px-8 py-3.5 rounded-[20px] flex items-center gap-3 font-bold transition-all duration-300 relative ${activeTab === 'examples'
+                                    ? 'text-white shadow-lg bg-gradient-to-br from-emerald-600 to-teal-600'
+                                    : 'text-gray-500 hover:text-white hover:bg-white/5'}`}
+                            >
+                                <BookOpen className={`w-4 h-4 ${activeTab === 'examples' ? 'text-white' : 'text-gray-500'}`} />
+                                <span className="text-xs uppercase tracking-widest">Examples</span>
                             </button>
                         </div>
                     </div>
@@ -269,83 +216,33 @@ export function ResourcesPage() {
                                     </motion.div>
                                 ))}
                             </motion.div>
-                        ) : (
+                        ) : activeTab === 'templates' ? (
                             <motion.div
                                 key="templates"
                                 initial={{ opacity: 0, scale: 0.95 }}
                                 animate={{ opacity: 1, scale: 1 }}
                                 exit={{ opacity: 0, scale: 1.05 }}
                                 transition={{ duration: 0.5 }}
-                                className="space-y-12 max-w-5xl mx-auto"
                             >
-                                {templates.map((t, i) => (
-                                    <motion.div
-                                        key={i}
-                                        initial={{ opacity: 0, x: -20 }}
-                                        animate={{ opacity: 1, x: 0 }}
-                                        transition={{ delay: i * 0.05 }}
-                                        className="group bg-gray-950/40 backdrop-blur-xl border border-white/5 rounded-[40px] overflow-hidden hover:border-blue-500/30 transition-all duration-500 shadow-[0_32px_80px_-20px_rgba(0,0,0,0.8)]"
-                                    >
-                                        <div className="flex flex-col md:flex-row h-full">
-                                            {/* Info Side */}
-                                            <div className="md:w-[350px] p-10 flex flex-col justify-between bg-black/20 border-b md:border-b-0 md:border-r border-white/5 relative">
-                                                <div className="absolute inset-0 bg-blue-600/5 opacity-0 group-hover:opacity-100 transition-opacity" />
-                                                <div className="relative z-10">
-                                                    <div className="w-14 h-14 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center mb-8 group-hover:scale-110 transition-transform shadow-lg">
-                                                        <t.icon className="w-7 h-7 text-blue-400" />
-                                                    </div>
-                                                    <h3 className="text-2xl font-bold text-white mb-3 tracking-tight">{t.title}</h3>
-                                                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-400/10 border border-blue-400/20 text-[9px] font-black text-blue-400 tracking-widest uppercase">
-                                                        <span className="w-1.5 h-1.5 rounded-full bg-blue-400" />
-                                                        {t.category}
-                                                    </span>
-                                                </div>
-                                                <button
-                                                    onClick={() => handleCopy(t.code, i)}
-                                                    className="relative mt-12 w-full py-4 rounded-xl bg-white/[0.03] hover:bg-blue-600 border border-white/5 hover:border-transparent transition-all overflow-hidden group/btn z-10"
-                                                >
-                                                    <span className="flex items-center justify-center gap-3 relative z-10">
-                                                        {copied === i ? <Check className="w-4 h-4 text-white" /> : <Copy className="w-4 h-4 text-blue-400 group-hover/btn:text-white" />}
-                                                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white group-hover/btn:text-white">
-                                                            {copied === i ? "Copied" : "Copy Pattern"}
-                                                        </span>
-                                                    </span>
-                                                </button>
-                                            </div>
-
-                                            {/* Code Side */}
-                                            <div className="flex-1 min-w-0 bg-[#0A0A0B] flex flex-col">
-                                                {/* Mac-style Window Header */}
-                                                <div className="flex items-center gap-4 px-6 py-4 bg-white/[0.02] border-b border-white/5">
-                                                    <div className="flex gap-2">
-                                                        <div className="w-2.5 h-2.5 rounded-full bg-[#FF5F56] border border-[#E0443E]" />
-                                                        <div className="w-2.5 h-2.5 rounded-full bg-[#FFBD2E] border border-[#DEA123]" />
-                                                        <div className="w-2.5 h-2.5 rounded-full bg-[#27C93F] border border-[#1AAB29]" />
-                                                    </div>
-                                                    <div className="flex-1 text-center pr-16">
-                                                        <span className="text-[10px] font-mono text-gray-600 uppercase tracking-widest">{t.title.toLowerCase().replace(/\s/g, '_')}.movejs</span>
-                                                    </div>
-                                                </div>
-
-                                                <div className="relative flex-1 overflow-hidden group/code">
-                                                    <div className="absolute right-4 top-4 opacity-0 group-hover/code:opacity-100 transition-opacity">
-                                                        <span className="text-[9px] font-black uppercase tracking-widest text-gray-700">Read-Only</span>
-                                                    </div>
-                                                    <pre className="p-8 overflow-x-auto custom-scrollbar h-full">
-                                                        <code className="text-sm font-mono leading-relaxed whitespace-pre block">
-                                                            {t.code.split('\n').map((line, idx) => (
-                                                                <div key={idx} className="table-row">
-                                                                    <span className="table-cell select-none text-gray-700 text-right w-8 pr-6 text-xs">{idx + 1}</span>
-                                                                    <span className="table-cell text-gray-300">{line}</span>
-                                                                </div>
-                                                            ))}
-                                                        </code>
-                                                    </pre>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </motion.div>
-                                ))}
+                                <TemplatesPanel 
+                                    onCopyCode={(code) => {
+                                        navigator.clipboard.writeText(code);
+                                    }}
+                                />
+                            </motion.div>
+                        ) : (
+                            <motion.div
+                                key="examples"
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -20 }}
+                                transition={{ duration: 0.4 }}
+                            >
+                                <ExamplesPanel 
+                                    onCopyCode={(code) => {
+                                        navigator.clipboard.writeText(code);
+                                    }}
+                                />
                             </motion.div>
                         )}
                     </AnimatePresence>

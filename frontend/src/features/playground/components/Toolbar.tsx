@@ -1,15 +1,31 @@
-import { Play, RotateCcw, Download, Settings } from "lucide-react";
+import { Play, RotateCcw, Download, CheckSquare, Zap, Fuel } from "lucide-react";
 import { motion } from "framer-motion";
 
 interface ToolbarProps {
   onCompile: () => void;
+  onValidate: () => void;
+  onAnalyze: () => void;
+  onEstimateGas: () => void;
   onReset: () => void;
   onDownload: () => void;
   isCompiling: boolean;
+  isValidating: boolean;
+  isAnalyzing: boolean;
   onToggleSidebar?: () => void;
 }
 
-export default function Toolbar({ onCompile, onReset, onDownload, isCompiling, onToggleSidebar }: ToolbarProps) {
+export default function Toolbar({ 
+  onCompile, 
+  onValidate, 
+  onAnalyze, 
+  onEstimateGas, 
+  onReset, 
+  onDownload, 
+  isCompiling, 
+  isValidating, 
+  isAnalyzing, 
+  onToggleSidebar 
+}: ToolbarProps) {
   return (
     <div className="border-b border-border/50 bg-white/60 dark:bg-white/10 backdrop-blur-sm px-4 py-3">
       <div className="container mx-auto flex items-center justify-between">
@@ -30,33 +46,53 @@ export default function Toolbar({ onCompile, onReset, onDownload, isCompiling, o
           </h2>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <ToolbarButton
             onClick={onCompile}
             disabled={isCompiling}
             icon={<Play className="w-4 h-4" />}
             label={isCompiling ? "Compiling..." : "Compile"}
             variant="primary"
+            title="Compile MoveJS code"
           />
+
+          <ToolbarButton
+            onClick={onValidate}
+            disabled={isValidating}
+            icon={<CheckSquare className="w-4 h-4" />}
+            label={isValidating ? "Validating..." : "Validate"}
+            title="Validate code syntax"
+          />
+
+          <ToolbarButton
+            onClick={onAnalyze}
+            disabled={isAnalyzing}
+            icon={<Zap className="w-4 h-4" />}
+            label={isAnalyzing ? "Analyzing..." : "Analyze"}
+            title="Analyze code structure"
+          />
+
+          <ToolbarButton
+            onClick={onEstimateGas}
+            icon={<Fuel className="w-4 h-4" />}
+            label="Gas"
+            title="Estimate gas costs"
+          />
+
+          <div className="h-6 w-px bg-border/50 mx-1" />
 
           <ToolbarButton
             onClick={onReset}
             icon={<RotateCcw className="w-4 h-4" />}
             label="Reset"
+            title="Reset to default code"
           />
 
           <ToolbarButton
             onClick={onDownload}
             icon={<Download className="w-4 h-4" />}
             label="Download"
-          />
-
-          <div className="h-6 w-px bg-border/50 mx-2" />
-
-          <ToolbarButton
-            onClick={() => {}}
-            icon={<Settings className="w-4 h-4" />}
-            label=""
+            title="Download compiled code"
           />
         </div>
       </div>
@@ -70,19 +106,21 @@ interface ToolbarButtonProps {
   icon: React.ReactNode;
   label: string;
   variant?: "primary" | "secondary";
+  title?: string;
 }
 
-function ToolbarButton({ onClick, disabled, icon, label, variant = "secondary" }: ToolbarButtonProps) {
+function ToolbarButton({ onClick, disabled, icon, label, variant = "secondary", title }: ToolbarButtonProps) {
   const isPrimary = variant === "primary";
 
   return (
     <motion.button
-      whileHover={{ scale: 1.05 }}
-      whileTap={{ scale: 0.95 }}
+      whileHover={{ scale: disabled ? 1 : 1.05 }}
+      whileTap={{ scale: disabled ? 1 : 0.95 }}
       onClick={onClick}
       disabled={disabled}
+      title={title}
       className={`
-        flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-sm transition-all
+        flex items-center gap-2 px-3 py-2 rounded-lg font-medium text-sm transition-all whitespace-nowrap
         ${isPrimary
           ? "bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:opacity-90"
           : "bg-white/60 dark:bg-white/10 hover:bg-white/80 dark:hover:bg-white/20 border border-border/50"
@@ -91,7 +129,7 @@ function ToolbarButton({ onClick, disabled, icon, label, variant = "secondary" }
       `}
     >
       {icon}
-      {label && <span>{label}</span>}
+      {label && <span className="text-xs md:text-sm">{label}</span>}
     </motion.button>
   );
 }

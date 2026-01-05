@@ -54,6 +54,12 @@ function FilesTab({ onOpenExample }: { onOpenExample?: (code: string) => void })
         return "counter";
     };
 
+    const exampleCategories = {
+        "Basic": ["counter"],
+        "Tokens & Assets": ["token", "nft"],
+        "DeFi": ["vault", "marketplace", "staking"],
+    };
+
     return (
         <div className="space-y-3">
             <div className="flex items-center gap-2 px-2 py-1.5 text-sm font-medium">
@@ -79,20 +85,27 @@ function FilesTab({ onOpenExample }: { onOpenExample?: (code: string) => void })
                 ))}
             </div>
 
-            {/* Examples */}
-            <div className="mt-3 px-2">
-                <div className="text-xs font-semibold text-muted-foreground mb-2">Examples</div>
-                <div className="space-y-2">
-                    {Object.keys(EXAMPLES).map((key) => (
-                        <button
-                            key={key}
-                            onClick={() => onOpenExample?.(EXAMPLES[key as keyof typeof EXAMPLES])}
-                            className="w-full text-left px-3 py-2 rounded-lg hover:bg-muted transition-colors text-sm font-mono"
-                        >
-                            {key}
-                        </button>
-                    ))}
-                </div>
+            {/* Examples by Category */}
+            <div className="mt-4 pt-3 border-t border-border/30">
+                {Object.entries(exampleCategories).map(([category, examples]) => (
+                    <div key={category} className="mb-3">
+                        <div className="text-xs font-semibold text-muted-foreground px-2 mb-2 uppercase tracking-wider">
+                            {category}
+                        </div>
+                        <div className="space-y-1 ml-2">
+                            {examples.map((key) => (
+                                <motion.button
+                                    key={key}
+                                    whileHover={{ x: 4 }}
+                                    onClick={() => onOpenExample?.(EXAMPLES[key as keyof typeof EXAMPLES])}
+                                    className="w-full text-left px-3 py-2 rounded-lg hover:bg-muted/50 transition-colors text-sm font-mono text-muted-foreground hover:text-foreground"
+                                >
+                                    {key}
+                                </motion.button>
+                            ))}
+                        </div>
+                    </div>
+                ))}
             </div>
         </div>
     );

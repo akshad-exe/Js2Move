@@ -1,13 +1,6 @@
 import { compile } from '@js2move/compiler';
 import { getPrisma } from '@/config/database';
-
-export interface DeployOptions {
-  source: string;
-  network: 'testnet' | 'mainnet';
-  privateKey?: string;
-  moduleName?: string;
-  gasLimit?: number;
-}
+import { DeployOptions, DeploymentResult } from '@/types';
 
 export class DeploymentService {
   private getPrismaInstance() {

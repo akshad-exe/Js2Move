@@ -1,16 +1,11 @@
 import fs from 'fs';
 import path from 'path';
+import { CodeExample } from '@/types';
 
 // Path to examples directory (assuming it's in the compiler package)
 const examplesDir = path.resolve(process.cwd(), '../compiler/examples');
 
-export interface Example {
-  id: string;
-  name: string;
-  description?: string;
-  source: string;
-  difficulty: 'beginner' | 'intermediate' | 'advanced';
-}
+type Example = CodeExample;
 
 export class ExamplesService {
   private examples: Example[] = [];

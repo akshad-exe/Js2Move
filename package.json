@@ -3,11 +3,11 @@
     "private": true,
     "version": "0.0.0",
     "workspaces": [
+        "frontend",
         "packages/*"
     ],
     "scripts": {
         "bootstrap": "pnpm install && pnpm run build",
-
         "install:all": "pnpm install",
         "install:frontend": "pnpm install --filter @js2move/frontend",
         "install:backend": "pnpm install --filter @js2move/backend",
@@ -15,19 +15,15 @@
         "install:cli": "pnpm install --filter @js2move/cli",
         "install:sdk": "pnpm install --filter @js2move/sdk",
         "install:shared-types": "pnpm install --filter @js2move/shared-types",
-
         "dev": "pnpm -r --parallel run dev",
         "dev:backend": "pnpm --filter @js2move/backend dev",
         "dev:frontend": "pnpm --filter @js2move/frontend dev",
         "dev:cli": "pnpm --filter @js2move/cli dev",
-        
-
         "build": "pnpm -r run build",
         "build:backend": "pnpm --filter @js2move/backend build",
         "build:frontend": "pnpm --filter @js2move/frontend build",
         "build:compiler": "pnpm --filter @js2move/compiler build",
         "build:cli": "pnpm --filter @js2move/cli build",
-
         "test": "pnpm -r run test",
         "lint": "pnpm -r run lint",
         "check:build-scripts": "node ./scripts/check-build-scripts.js",
@@ -38,5 +34,7 @@
         "tsconfig-paths": "^4.1.0",
         "typescript": "^5.2.0"
     },
-    "dependencies": {}
+    "dependencies": {
+        "terser": "^5.44.1"
+    }
 }

@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { getExamples, getExample } from '@/lib/api/examplesClient';
-import { CodeExample } from '@/lib/types';
+import type { CodeExample } from '@/lib/types';
 
 export function useExamples(category?: string, difficulty?: string) {
   const [examples, setExamples] = useState<CodeExample[]>([]);

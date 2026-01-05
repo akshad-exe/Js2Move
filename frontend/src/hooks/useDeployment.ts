@@ -5,7 +5,7 @@ import {
   getDeploymentDetails, 
   getDeploymentStatus 
 } from '@/lib/api/deploymentClient';
-import { 
+import type { 
   DeploymentRequest, 
   DeploymentResponse, 
   Deployment 

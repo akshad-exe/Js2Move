@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react';
 import toast from 'react-hot-toast';
 import { validateCode, analyzeCode } from '@/lib/api/compilerClient';
 import { compileMoveJS } from '@/lib/compiler/compilerBridge';
-import { ValidationResponse, AnalysisResponse } from '@/lib/types';
+import type { ValidationResponse, AnalysisResponse } from '@/lib/types';
 
 export function useCompiler() {
   const [isCompiling, setIsCompiling] = useState(false);

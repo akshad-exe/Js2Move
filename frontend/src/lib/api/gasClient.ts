@@ -1,17 +1,17 @@
 import { apiClient } from './axiosClient';
 import toast from 'react-hot-toast';
-import { 
-  GasEstimateRequest, 
-  GasEstimateResponse, 
-  GasPriceResponse 
-} from '../types';
+import type {
+  GasEstimateRequest,
+  GasEstimateResponse,
+  GasPriceResponse,
+} from "../types";
 
 /**
  * Estimate gas for a deployment
  */
 export async function estimateGas(request: GasEstimateRequest): Promise<GasEstimateResponse | null> {
   try {
-    const response = await apiClient.post<GasEstimateResponse>('/gas/estimate', request);
+    const response = await apiClient.post<GasEstimateResponse>('/public/gas/estimate', request);
     return response.data;
   } catch (error) {
     console.error('Failed to estimate gas:', error);
@@ -25,7 +25,7 @@ export async function estimateGas(request: GasEstimateRequest): Promise<GasEstim
  */
 export async function getGasPrice(): Promise<GasPriceResponse | null> {
   try {
-    const response = await apiClient.get<GasPriceResponse>('/gas/price');
+    const response = await apiClient.get<GasPriceResponse>('/public/gas/price');
     return response.data;
   } catch (error) {
     console.error('Failed to fetch gas price:', error);

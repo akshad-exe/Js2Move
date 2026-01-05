@@ -1,16 +1,47 @@
 import { apiClient } from './axiosClient';
-import { 
-  ValidationResponse, 
+import type {
   AnalysisResponse, 
+  ValidationResponse,
   CompileError 
 } from '../types';
+
+export interface CompileResponse {
+  move: string;
+  warnings?: string[];
+}
+
+/**
+ * Compile MoveJS to Move code
+ */
+export async function compileCode(source: string): Promise<{ success: boolean; code: string; warnings: string[] }> {
+  try {
+    const response = await apiClient.post<CompileResponse>('/public/compiler/compile', {
+      source,
+    });
+
+    const moveCode = response.data.move || '';
+    return {
+      success: !!moveCode,
+      code: moveCode,
+      warnings: response.data.warnings || [],
+    };
+  } catch (error) {
+    console.error('Compilation error:', error);
+    const message = error instanceof Error ? error.message : 'Compilation failed';
+    return {
+      success: false,
+      code: '',
+      warnings: [message],
+    };
+  }
+}
 
 /**
  * Validate MoveJS syntax (no errors required)
  */
 export async function validateCode(source: string): Promise<ValidationResponse> {
   try {
-    const response = await apiClient.post<ValidationResponse>('/compiler/validate', {
+    const response = await apiClient.post<ValidationResponse>('/public/compiler/validate', {
       source,
     });
 
@@ -30,7 +61,7 @@ export async function validateCode(source: string): Promise<ValidationResponse> 
  */
 export async function analyzeCode(source: string): Promise<AnalysisResponse> {
   try {
-    const response = await apiClient.post<AnalysisResponse>('/compiler/analyze', {
+    const response = await apiClient.post<AnalysisResponse>('/public/compiler/analyze', {
       source,
     });
 

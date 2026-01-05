@@ -28,12 +28,11 @@ export interface AccountInfo {
 
 export interface CodeExample {
   id: string;
-  title: string;
-  description: string;
-  category: string;
-  code: string;
+  name: string;
+  description?: string;
+  source: string;
   difficulty: 'beginner' | 'intermediate' | 'advanced';
-  tags: string[];
+  tags?: string[];
   author?: string;
 }
 

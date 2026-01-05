@@ -1,25 +1,23 @@
 import { apiClient } from './axiosClient';
-import { 
-  CodeExample, 
-  ExamplesResponse 
+import type {
+  CodeExample 
 } from '../types';
 
 /**
- * Get all code examples
+ * Get all code examples with optional filtering
  */
 export async function getExamples(
-  category?: string,
   difficulty?: string
 ): Promise<CodeExample[]> {
   try {
     const params = new URLSearchParams();
-    if (category) params.append('category', category);
-    if (difficulty) params.append('difficulty', difficulty);
+    if (difficulty) params.append('difficulty', difficulty.toLowerCase());
+    params.append('includeSource', 'true');
 
     const queryString = params.toString();
-    const endpoint = queryString ? `/examples?${queryString}` : '/examples';
+    const endpoint = queryString ? `/public/examples?${queryString}` : '/public/examples?includeSource=true';
     
-    const response = await apiClient.get<ExamplesResponse>(endpoint);
+    const response = await apiClient.get<{ examples: CodeExample[] }>(endpoint);
     return response.data.examples || [];
   } catch (error) {
     console.error('Failed to fetch examples:', error);
@@ -28,11 +26,11 @@ export async function getExamples(
 }
 
 /**
- * Get specific example by ID
+ * Get specific example by ID (includes source code)
  */
 export async function getExample(id: string): Promise<CodeExample | null> {
   try {
-    const response = await apiClient.get<CodeExample>(`/example/${id}`);
+    const response = await apiClient.get<CodeExample>(`/public/example/${id}`);
     return response.data;
   } catch (error) {
     console.error('Failed to fetch example:', error);
@@ -41,17 +39,10 @@ export async function getExample(id: string): Promise<CodeExample | null> {
 }
 
 /**
- * Get examples by category
- */
-export async function getExamplesByCategory(category: string): Promise<CodeExample[]> {
-  return getExamples(category);
-}
-
-/**
  * Get examples by difficulty level
  */
 export async function getExamplesByDifficulty(difficulty: string): Promise<CodeExample[]> {
-  return getExamples(undefined, difficulty);
+  return getExamples(difficulty);
 }
 
 /**
@@ -61,22 +52,23 @@ export function searchExamples(examples: CodeExample[], keyword: string): CodeEx
   const lower = keyword.toLowerCase();
   return examples.filter(
     (ex) =>
-      ex.title.toLowerCase().includes(lower) ||
-      ex.description.toLowerCase().includes(lower) ||
-      ex.tags.some((tag) => tag.toLowerCase().includes(lower))
+      (ex.name?.toLowerCase().includes(lower) ?? false) ||
+      (ex.description?.toLowerCase().includes(lower) ?? false) ||
+      (ex.tags?.some((tag) => tag?.toLowerCase().includes(lower)) ?? false)
   );
 }
 
 /**
- * Group examples by category
+ * Group examples by difficulty
  */
-export function groupByCategory(examples: CodeExample[]): Record<string, CodeExample[]> {
+export function groupByDifficulty(examples: CodeExample[]): Record<string, CodeExample[]> {
   return examples.reduce(
     (acc, example) => {
-      if (!acc[example.category]) {
-        acc[example.category] = [];
+      const difficulty = (example.difficulty || 'intermediate').charAt(0).toUpperCase() + (example.difficulty || 'intermediate').slice(1);
+      if (!acc[difficulty]) {
+        acc[difficulty] = [];
       }
-      acc[example.category].push(example);
+      acc[difficulty].push(example);
       return acc;
     },
     {} as Record<string, CodeExample[]>

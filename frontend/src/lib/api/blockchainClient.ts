@@ -1,8 +1,8 @@
 import { apiClient } from './axiosClient';
-import { 
-  NetworkStatus, 
+import type {
   Transaction, 
-  AccountInfo 
+  AccountInfo,
+  NetworkStatus
 } from '../types';
 
 /**

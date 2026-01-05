@@ -1,10 +1,10 @@
 import { apiClient } from './axiosClient';
 import toast from 'react-hot-toast';
-import { 
-  DeploymentRequest, 
-  DeploymentResponse, 
-  Deployment,
-  DeploymentStatus
+import type {
+  DeploymentRequest,
+  DeploymentResponse,
+  DeploymentStatus,
+  Deployment
 } from '../types';
 
 /**
@@ -14,7 +14,7 @@ export async function deployContract(request: DeploymentRequest): Promise<Deploy
   try {
     const toastId = toast.loading('Deploying contract...');
     
-    const response = await apiClient.post<DeploymentResponse>('/deploy', request);
+    const response = await apiClient.post<DeploymentResponse>('/public/deploy', request);
     
     if (response.data.success) {
       toast.success('Deployment initiated!', { id: toastId });
@@ -36,7 +36,7 @@ export async function deployContract(request: DeploymentRequest): Promise<Deploy
  */
 export async function getDeployments(): Promise<Deployment[]> {
   try {
-    const response = await apiClient.get<Deployment[]>('/deployments');
+    const response = await apiClient.get<Deployment[]>('/public/deployments');
     return response.data || [];
   } catch (error) {
     console.error('Failed to fetch deployments:', error);
@@ -49,7 +49,7 @@ export async function getDeployments(): Promise<Deployment[]> {
  */
 export async function getDeploymentHistory(): Promise<Deployment[]> {
   try {
-    const response = await apiClient.get<Deployment[]>('/deployment/history');
+    const response = await apiClient.get<Deployment[]>('/public/deployment/history');
     return response.data || [];
   } catch (error) {
     console.error('Failed to fetch deployment history:', error);
@@ -62,7 +62,7 @@ export async function getDeploymentHistory(): Promise<Deployment[]> {
  */
 export async function getDeploymentDetails(deploymentId: string): Promise<Deployment | null> {
   try {
-    const response = await apiClient.get<Deployment>(`/deployment/${deploymentId}`);
+    const response = await apiClient.get<Deployment>(`/public/deployment/${deploymentId}`);
     return response.data;
   } catch (error) {
     console.error('Failed to fetch deployment details:', error);
@@ -75,7 +75,7 @@ export async function getDeploymentDetails(deploymentId: string): Promise<Deploy
  */
 export async function getDeploymentStatus(txHash: string): Promise<DeploymentStatus | null> {
   try {
-    const response = await apiClient.get<DeploymentStatus>(`/deployment/status/${txHash}`);
+    const response = await apiClient.get<DeploymentStatus>(`/public/deployment/status/${txHash}`);
     return response.data;
   } catch (error) {
     console.error('Failed to fetch deployment status:', error);

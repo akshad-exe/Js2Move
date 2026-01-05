@@ -1,4 +1,4 @@
-import { apiClient } from '@/lib/api/axiosClient';
+import { compileCode } from '@/lib/api/compilerClient';
 import toast from 'react-hot-toast';
 
 export async function compileMoveJS(source: string): Promise<{
@@ -7,25 +7,31 @@ export async function compileMoveJS(source: string): Promise<{
     logs: string[];
 }> {
     try {
-        const response = await apiClient.post('/compiler/compile', {
-            source,
-        });
+        const result = await compileCode(source);
 
-        if (response.data.success) {
+        if (result.success) {
             toast.success('Compilation successful!');
+            return {
+                success: true,
+                output: result.code,
+                logs: result.warnings,
+            };
+        } else {
+            const errorMsg = result.warnings[0] || 'Compilation produced empty output';
+            toast.error(errorMsg);
+            return {
+                success: false,
+                output: '',
+                logs: result.warnings,
+            };
         }
-
-        return {
-            success: response.data.success,
-            output: response.data.output || '',
-            logs: response.data.logs || [],
-        };
     } catch (error) {
+        const errorMsg = error instanceof Error ? error.message : 'Compilation error occurred';
         toast.error('Compilation failed. Please try again.');
         return {
             success: false,
             output: '',
-            logs: ['Compilation error occurred'],
+            logs: [errorMsg],
         };
     }
 }

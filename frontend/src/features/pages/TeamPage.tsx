@@ -63,7 +63,7 @@ const teamMembers: TeamMember[] = [
             twitter: "https://x.com/Akshad_exe",
             github: "https://github.com/akshad-exe",
             linkedin: "https://www.linkedin.com/in/akshad-jogi/",
-            email: "akshadhjogi@gmail.com"
+            email: "hello@akshad.tech"
         }
     },
     {
@@ -82,7 +82,7 @@ const teamMembers: TeamMember[] = [
             twitter: "https://x.com/iamharxh",
             github: "https://github.com/HarshHp15s",
             linkedin: "https://www.linkedin.com/in/harshjainrs/",
-            email: "harshjain@gmail.com"
+            email: "harshjainhp15s@gmail.com"
         }
     }
 ];

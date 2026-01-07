@@ -6,28 +6,42 @@ import { Footer } from "@/components/shared/Footer";
 import { GravityStars } from "@/components/effects/GravityStars";
 import LightRays from "@/components/effects/LightRays";
 import { Mail, Shield, Zap, ArrowRight, Lock } from "lucide-react";
+import { submitWaitlist } from "@/lib/api/waitlistClient";
 
 export function WaitlistPage() {
     const [email, setEmail] = useState("");
     const [status, setStatus] = useState<"idle" | "loading" | "success">("idle");
 
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!email) {
+        const trimmed = email.trim();
+        if (!trimmed) {
             toast.error('Please enter your email');
             return;
         }
-        
+
         setStatus("loading");
         try {
-            // Simulate API call
-            await new Promise(resolve => setTimeout(resolve, 1500));
+            const res = await submitWaitlist(trimmed);
+
+            if (res && res.alreadySubmitted) {
+                // Treat 'already submitted' as success so users see the confirmation UI
+                setStatus("success");
+                toast.success("You're already on the waitlist! 🎉");
+                setEmail("");
+                setTimeout(() => setStatus("idle"), 3000);
+                return;
+            }
+
             setStatus("success");
-            toast.success('You\'re on the waitlist! 🎉');
+            toast.success("You're on the waitlist! 🎉");
             setEmail("");
             setTimeout(() => setStatus("idle"), 3000);
-        } catch (err) {
-            toast.error('Failed to join waitlist. Please try again.');
+        } catch (err: any) {
+            // Show a helpful message if available
+            const message = err?.message || 'Failed to join waitlist. Please try again.';
+            toast.error(message);
             setStatus("idle");
         }
     };

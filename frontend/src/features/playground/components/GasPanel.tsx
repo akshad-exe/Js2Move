@@ -13,6 +13,7 @@ export default function GasPanel({ code }: GasPanelProps) {
   const [gasPrice, setGasPrice] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [mode, setMode] = useState<'fast' | 'accurate'>('fast');
 
   const handleEstimate = async () => {
     if (!code.trim()) {
@@ -24,11 +25,29 @@ export default function GasPanel({ code }: GasPanelProps) {
     setError("");
     try {
       const [estimate, priceData] = await Promise.all([
-        estimateGas({ source: code }),
+        estimateGas({ source: code, mode }),
         getGasPrice(),
       ]);
-      setGasEstimate(estimate);
-      setGasPrice(priceData?.gasPrice || null);
+
+      // The backend returns GasEstimateResponse directly now. Normalize fields for the UI.
+      const normalizedEstimate = estimate
+        ? {
+            estimatedGas: (estimate as any).estimatedGas ?? 0,
+            maxGas: (estimate as any).maxGas ?? null,
+            totalCostAPT:
+              typeof (estimate as any).totalCostAPT === 'number'
+                ? (estimate as any).totalCostAPT
+                : typeof (estimate as any).totalCost === 'number' && priceData?.gasPrice
+                ? ((estimate as any).totalCost / 100_000_000) // fallback conversion from atomic
+                : null,
+            raw: estimate,
+            approximate: (estimate as any).approximate || false,
+            source: (estimate as any).source || 'unknown',
+          }
+        : null;
+
+      setGasEstimate(normalizedEstimate);
+      setGasPrice(priceData?.gasPrice ?? null);
       toast.success("Gas estimation complete!");
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : "Failed to estimate gas";
@@ -51,6 +70,18 @@ export default function GasPanel({ code }: GasPanelProps) {
 
       {/* Content */}
       <div className="flex-1 overflow-auto p-6">
+        {/* Mode selector */}
+        <div className="mb-4 flex items-center justify-end gap-3">
+          <div className="text-xs text-muted-foreground">Mode:</div>
+          <div className="inline-flex rounded-lg bg-white/5 p-1">
+            <button onClick={() => setMode('fast')} className={`px-3 py-1 rounded text-sm ${mode === 'fast' ? 'bg-white/10 font-semibold' : ''}`}>Fast</button>
+            <button onClick={() => setMode('accurate')} className={`px-3 py-1 rounded text-sm ${mode === 'accurate' ? 'bg-white/10 font-semibold' : ''}`}>Accurate</button>
+          </div>
+          {mode === 'accurate' && (
+            <div className="text-xs text-yellow-600">Accurate mode will compile and may take longer.</div>
+          )}
+        </div>
+
         {error ? (
           <div className="p-4 rounded-lg bg-red-500/10 border border-red-500/30">
             <p className="text-red-600 dark:text-red-400 text-sm">{error}</p>
@@ -61,9 +92,14 @@ export default function GasPanel({ code }: GasPanelProps) {
             <div className="p-4 rounded-lg border border-purple-500/20 bg-purple-500/5">
               <div className="flex items-start justify-between mb-4">
                 <div>
-                  <p className="text-xs text-muted-foreground mb-1">Estimated Gas Units</p>
+                  <div className="flex items-center gap-2 mb-1">
+                    <p className="text-xs text-muted-foreground">Estimated Gas Units</p>
+                    {gasEstimate?.approximate && (
+                      <span className="text-xs px-2 py-0.5 bg-yellow-200/20 text-yellow-700 rounded">Approximate</span>
+                    )}
+                  </div>
                   <p className="text-3xl font-bold text-purple-600 dark:text-purple-400">
-                    {gasEstimate?.units || gasEstimate?.gas || "0"}
+                    {gasEstimate?.estimatedGas ?? 0}
                   </p>
                 </div>
                 <TrendingUp className="w-8 h-8 text-purple-500 opacity-50" />
@@ -88,7 +124,11 @@ export default function GasPanel({ code }: GasPanelProps) {
               <div className="p-4 rounded-lg border border-green-500/20 bg-green-500/5">
                 <p className="text-xs text-muted-foreground mb-1">Estimated Transaction Cost</p>
                 <p className="text-2xl font-bold text-green-600 dark:text-green-400">
-                  {((gasEstimate?.units || gasEstimate?.gas || 0) * gasPrice).toFixed(6)} APT
+                  {(() => {
+                    const units = gasEstimate?.estimatedGas ?? 0;
+                    const total = gasPrice !== null ? units * gasPrice : gasEstimate?.totalCostAPT ?? 0;
+                    return `${Number(total).toFixed(6)} APT`;
+                  })()}
                 </p>
                 <p className="text-xs text-muted-foreground mt-2">
                   Approximate cost in Aptos native token
@@ -97,11 +137,11 @@ export default function GasPanel({ code }: GasPanelProps) {
             )}
 
             {/* Details */}
-            {gasEstimate?.details && (
+            {gasEstimate?.raw?.details && (
               <div className="p-4 rounded-lg border border-border/50 bg-muted/20">
                 <p className="text-sm font-semibold mb-2">Details</p>
                 <pre className="text-xs bg-muted/50 p-3 rounded overflow-auto max-h-32">
-                  {JSON.stringify(gasEstimate.details, null, 2)}
+                  {JSON.stringify(gasEstimate.raw.details, null, 2)}
                 </pre>
               </div>
             )}

@@ -44,16 +44,21 @@ export interface ExamplesResponse {
 export interface GasEstimateRequest {
   source: string;
   network?: string;
+  mode?: 'fast' | 'accurate'; // 'fast' = synthetic simulation (default), 'accurate' = full compile + simulate
 }
 
 export interface GasEstimateResponse {
   estimatedGas: number;
-  gasPrice: number;
-  totalCost: number;
+  maxGas?: number;
+  gasPrice?: number; // may be atomic or APT depending on the endpoint
+  totalCost?: number; // atomic total cost (e.g., octas)
+  totalCostAPT?: number; // cost in APT
+  currency?: string;
+  details?: any;
 }
 
 export interface GasPriceResponse {
-  gasPrice: number;
+  gasPrice: number; // price per gas unit in APT
   unit: string;
   lastUpdated: string;
 }

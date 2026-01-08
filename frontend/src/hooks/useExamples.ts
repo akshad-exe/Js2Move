@@ -11,7 +11,7 @@ export function useExamples(category?: string, difficulty?: string) {
     setLoading(true);
     setError(null);
     try {
-      const data = await getExamples(category, difficulty);
+      const data = await getExamples(difficulty);
       setExamples(data);
     } catch (err) {
       setError('Failed to fetch examples');

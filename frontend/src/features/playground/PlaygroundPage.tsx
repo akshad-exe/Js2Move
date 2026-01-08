@@ -1,7 +1,5 @@
 import { useState } from "react";
-import { motion } from "framer-motion";
 import toast from "react-hot-toast";
-import { GravityStars } from "@/components/effects/GravityStars";
 import { Navbar } from "@/components/shared/Navbar";
 import { useTheme } from "@/lib/theme/ThemeProvider";
 import CodeEditor from "./components/CodeEditor";
@@ -88,13 +86,6 @@ export function PlaygroundPage() {
 
   return (
     <>
-      <GravityStars
-        starsCount={80}
-        starsSize={2.5}
-        movementSpeed={0.8}
-        mouseInfluence={120}
-        gravityStrength={85}
-      />
 
       <div className="min-h-screen bg-background text-foreground">
         <Navbar />
@@ -136,11 +127,7 @@ export function PlaygroundPage() {
               {/* Editor / Output Split */}
               <div className="grid grid-cols-1 md:grid-cols-2 flex-1">
                 <div className="h-full p-4">
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="h-full rounded-lg overflow-hidden border border-border/50 bg-white/40 dark:bg-white/5 backdrop-blur-sm flex flex-col"
-                  >
+                  <div className="h-full rounded-lg overflow-hidden border border-border/50 bg-white/40 dark:bg-white/5 backdrop-blur-sm flex flex-col transition-opacity duration-300">
                     <div className="px-4 py-3 border-b border-border/50 bg-white/60 dark:bg-white/10">
                       <h3 className="font-semibold text-sm">MoveJS Code</h3>
                     </div>
@@ -152,16 +139,11 @@ export function PlaygroundPage() {
                         theme={theme === "dark" ? "vs-dark" : "light"}
                       />
                     </div>
-                  </motion.div>
+                  </div>
                 </div>
 
                 <div className="h-full p-4">
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.1 }}
-                    className="h-full flex flex-col"
-                  >
+                  <div className="h-full flex flex-col transition-opacity duration-300" style={{ transitionDelay: "0.1s" }}>
                     {/* Tab Headers */}
                     <div className="flex gap-2 mb-2 border-b border-border/50">
                       <TabButton
@@ -205,7 +187,7 @@ export function PlaygroundPage() {
                         />
                       )}
                     </div>
-                  </motion.div>
+                  </div>
                 </div>
               </div>
 
@@ -223,18 +205,16 @@ export function PlaygroundPage() {
 
 function TabButton({ active, onClick, label }: { active: boolean; onClick: () => void; label: string }) {
   return (
-    <motion.button
+    <button
       onClick={onClick}
       className={`px-4 py-2 text-sm font-medium transition-colors ${
         active
           ? "text-purple-500 border-b-2 border-purple-500"
           : "text-muted-foreground hover:text-foreground"
       }`}
-      whileHover={{ scale: 1.05 }}
-      whileTap={{ scale: 0.95 }}
     >
       {label}
-    </motion.button>
+    </button>
   );
 }
 

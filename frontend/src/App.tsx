@@ -1,18 +1,39 @@
-import { Suspense } from "react";
+import { Suspense, lazy } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
-import { LandingPage } from "./features/pages/LandingPage";
 import { WalletProvider } from "./lib/wallet/WalletProvider";
 import { ErrorBoundary } from "./components/ErrorBoundary";
-import { PlaygroundPage } from "./features/playground/PlaygroundPage";
-import { DocsPage } from "./features/pages/DocsPage";
-import { WaitlistPage } from "./features/pages/WaitlistPage";
-import { TeamPage } from "./features/pages/TeamPage";
-import { ExtensionsPage } from "./features/pages/ExtensionsPage";
-import { ResourcesPage } from "./features/pages/ResourcesPage";
-import { BlogPage } from "./features/pages/BlogPage";
-import { BlogPostPage } from "./features/pages/BlogPostPage";
-import { NotFoundPage } from "./features/pages/NotFoundPage";
+
+const LandingPage = lazy(() =>
+  import("./features/pages/LandingPage").then((module) => ({ default: module.LandingPage })),
+);
+const PlaygroundPage = lazy(() =>
+  import("./features/playground/PlaygroundPage").then((module) => ({ default: module.PlaygroundPage })),
+);
+const DocsPage = lazy(() =>
+  import("./features/pages/DocsPage").then((module) => ({ default: module.DocsPage })),
+);
+const WaitlistPage = lazy(() =>
+  import("./features/pages/WaitlistPage").then((module) => ({ default: module.WaitlistPage })),
+);
+const TeamPage = lazy(() =>
+  import("./features/pages/TeamPage").then((module) => ({ default: module.TeamPage })),
+);
+const ExtensionsPage = lazy(() =>
+  import("./features/pages/ExtensionsPage").then((module) => ({ default: module.ExtensionsPage })),
+);
+const ResourcesPage = lazy(() =>
+  import("./features/pages/ResourcesPage").then((module) => ({ default: module.ResourcesPage })),
+);
+const BlogPage = lazy(() =>
+  import("./features/pages/BlogPage").then((module) => ({ default: module.BlogPage })),
+);
+const BlogPostPage = lazy(() =>
+  import("./features/pages/BlogPostPage").then((module) => ({ default: module.BlogPostPage })),
+);
+const NotFoundPage = lazy(() =>
+  import("./features/pages/NotFoundPage").then((module) => ({ default: module.NotFoundPage })),
+);
 
 // Loading spinner for lazy-loaded routes
 function LoadingSpinner() {

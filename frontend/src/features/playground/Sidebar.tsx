@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { X, File, Folder, ChevronRight, Settings2, Palette, Code2 } from "lucide-react";
 import { EXAMPLES } from "./utils/defaultCode";
@@ -41,23 +42,24 @@ export function Sidebar({ tab, onClose, onOpenExample }: SidebarProps) {
 }
 
 function FilesTab({ onOpenExample }: { onOpenExample?: (code: string) => void }) {
-    const files = [
-        { name: "main.movejs", icon: File, active: true },
-        { name: "token.movejs", icon: File },
-        { name: "utils.movejs", icon: File },
-    ];
-
-    const mapFileToExampleKey = (name: string) => {
-        if (name.includes("main")) return "counter";
-        if (name.includes("token")) return "token";
-        if (name.includes("utils")) return "nft";
-        return "counter";
-    };
+    const [selectedFile, setSelectedFile] = useState("counter");
 
     const exampleCategories = {
-        "Basic": ["counter"],
-        "Tokens & Assets": ["token", "nft"],
-        "DeFi": ["vault", "marketplace", "staking"],
+        "Tokens & Assets": [
+            { name: "token.movejs", key: "token" },
+            { name: "nft.movejs", key: "nft" },
+        ],
+        "DeFi": [
+            { name: "vault.movejs", key: "vault" },
+        ],
+        "Governance": [
+            { name: "voting.movejs", key: "marketplace" },
+        ],
+    };
+
+    const handleFileSelect = (key: string) => {
+        setSelectedFile(key);
+        onOpenExample?.(EXAMPLES[key as keyof typeof EXAMPLES]);
     };
 
     return (
@@ -69,38 +71,40 @@ function FilesTab({ onOpenExample }: { onOpenExample?: (code: string) => void })
             </div>
 
             <div className="ml-6 space-y-1">
-                {files.map((file) => (
-                    <motion.button
-                        key={file.name}
-                        whileHover={{ x: 4 }}
-                        onClick={() => onOpenExample?.(EXAMPLES[mapFileToExampleKey(file.name) as keyof typeof EXAMPLES])}
-                        className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-left transition-colors ${file.active
-                                ? "bg-purple-500/10 text-purple-400 border border-purple-500/20"
-                                : "hover:bg-muted"
-                            }`}
-                    >
-                        <file.icon className="h-4 w-4" />
-                        <span className="text-sm font-mono">{file.name}</span>
-                    </motion.button>
-                ))}
+                <motion.button
+                    whileHover={{ x: 4 }}
+                    onClick={() => handleFileSelect("counter")}
+                    className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-left transition-colors ${
+                        selectedFile === "counter"
+                            ? "bg-purple-500/10 text-purple-400 border border-purple-500/20"
+                            : "hover:bg-muted/50 text-muted-foreground hover:text-foreground"
+                    }`}
+                >
+                    <File className="h-4 w-4" />
+                    <span className="text-sm font-mono">helloworld.movejs</span>
+                </motion.button>
             </div>
 
-            {/* Examples by Category */}
             <div className="mt-4 pt-3 border-t border-border/30">
-                {Object.entries(exampleCategories).map(([category, examples]) => (
+                {Object.entries(exampleCategories).map(([category, files]) => (
                     <div key={category} className="mb-3">
                         <div className="text-xs font-semibold text-muted-foreground px-2 mb-2 uppercase tracking-wider">
                             {category}
                         </div>
                         <div className="space-y-1 ml-2">
-                            {examples.map((key) => (
+                            {files.map((file) => (
                                 <motion.button
-                                    key={key}
+                                    key={file.name}
                                     whileHover={{ x: 4 }}
-                                    onClick={() => onOpenExample?.(EXAMPLES[key as keyof typeof EXAMPLES])}
-                                    className="w-full text-left px-3 py-2 rounded-lg hover:bg-muted/50 transition-colors text-sm font-mono text-muted-foreground hover:text-foreground"
+                                    onClick={() => handleFileSelect(file.key)}
+                                    className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-left transition-colors ${
+                                        selectedFile === file.key
+                                            ? "bg-purple-500/10 text-purple-400 border border-purple-500/20"
+                                            : "hover:bg-muted/50 text-muted-foreground hover:text-foreground"
+                                    }`}
                                 >
-                                    {key}
+                                    <File className="h-4 w-4" />
+                                    <span className="text-sm font-mono">{file.name}</span>
                                 </motion.button>
                             ))}
                         </div>

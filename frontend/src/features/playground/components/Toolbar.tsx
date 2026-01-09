@@ -1,4 +1,4 @@
-import { Play, RotateCcw, Download, CheckSquare, Zap, Fuel } from "lucide-react";
+import { Play, RotateCcw, Download, CheckSquare, Zap, Fuel, Rocket } from "lucide-react";
 import { motion } from "framer-motion";
 
 interface ToolbarProps {
@@ -6,11 +6,14 @@ interface ToolbarProps {
   onValidate: () => void;
   onAnalyze: () => void;
   onEstimateGas: () => void;
+  onDeploy: () => void;
   onReset: () => void;
   onDownload: () => void;
   isCompiling: boolean;
   isValidating: boolean;
   isAnalyzing: boolean;
+  isDeploying: boolean;
+  isWalletConnected: boolean;
   onToggleSidebar?: () => void;
 }
 
@@ -18,12 +21,15 @@ export default function Toolbar({
   onCompile, 
   onValidate, 
   onAnalyze, 
-  onEstimateGas, 
+  onEstimateGas,
+  onDeploy,
   onReset, 
   onDownload, 
   isCompiling, 
   isValidating, 
-  isAnalyzing, 
+  isAnalyzing,
+  isDeploying,
+  isWalletConnected,
   onToggleSidebar 
 }: ToolbarProps) {
   return (
@@ -70,6 +76,15 @@ export default function Toolbar({
             icon={<Zap className="w-4 h-4" />}
             label={isAnalyzing ? "Analyzing..." : "Analyze"}
             title="Analyze code structure"
+          />
+
+          <ToolbarButton
+            onClick={onDeploy}
+            disabled={isDeploying || !isWalletConnected}
+            icon={<Rocket className="w-4 h-4" />}
+            label={isDeploying ? "Deploying..." : "Deploy"}
+            variant={isWalletConnected ? "primary" : "secondary"}
+            title={isWalletConnected ? "Deploy to Movement testnet" : "Connect wallet to deploy"}
           />
 
           <ToolbarButton

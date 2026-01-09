@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import { Navbar } from "@/components/shared/Navbar";
 import { useTheme } from "@/lib/theme/ThemeProvider";
@@ -7,18 +7,32 @@ import OutputPanel from "./components/OutputPanel";
 import Toolbar from "./components/Toolbar";
 import GasPanel from "./components/GasPanel";
 import ValidationPanel from "./components/ValidationPanel";
+import DeploymentPanel from "./components/DeploymentPanel";
 import { Sidebar } from "./Sidebar";
 import { DEFAULT_MOVEJS_CODE } from "./utils/defaultCode";
-import { useCompiler } from "@/hooks";
+import { useCompiler, useDeployment } from "@/hooks";
+import { useWallet } from "@/lib/wallet/useWallet";
+import { useWallet as useAptosWallet } from "@aptos-labs/wallet-adapter-react";
+import { compileCode, submitSignedTransaction } from "@/lib/api/deploymentClient";
 
-type OutputTab = "compile" | "validation" | "gas";
+type OutputTab = "compile" | "validation" | "gas" | "deploy";
 
 export function PlaygroundPage() {
   const { theme } = useTheme();
   const [code, setCode] = useState(DEFAULT_MOVEJS_CODE);
   const [outputTab, setOutputTab] = useState<OutputTab>("compile");
   const { compile, isCompiling, output, error, setOutput, setError, validate, isValidating, analyze, isAnalyzing } = useCompiler();
+  const { isDeploying, fetchDeployments } = useDeployment();
+  const { isConnected, address } = useWallet();
+  const { signTransaction } = useAptosWallet();
   const [validationOutput, setValidationOutput] = useState("");
+
+  // Check wallet balance when wallet connects
+  useEffect(() => {
+    if (isConnected && address) {
+      // Balance is now checked automatically in useWallet hook
+    }
+  }, [isConnected, address]);
 
   const handleCompile = async () => {
     const result = await compile(code);
@@ -82,6 +96,146 @@ export function PlaygroundPage() {
     }
   };
 
+  // Extract contract name from MoveJS code
+  const extractContractName = (code: string): string => {
+    // Look for contract declaration: contract ContractName {
+    const contractMatch = code.match(/contract\s+(\w+)\s*{/);
+    if (contractMatch) {
+      return contractMatch[1];
+    }
+    
+    // Fallback: look for class declaration
+    const classMatch = code.match(/class\s+(\w+)\s*{/);
+    if (classMatch) {
+      return classMatch[1];
+    }
+    
+    // Final fallback
+    return 'Contract';
+  };
+
+  const handleDeploy = async () => {
+    if (!isConnected) {
+      toast.error('Please connect your wallet first');
+      return;
+    }
+
+    if (!address) {
+      toast.error('Wallet address not available');
+      return;
+    }
+
+    if (!output || !output.trim()) {
+      toast.error('Please compile your code first');
+      return;
+    }
+
+    try {
+      // Extract contract name from the source code
+      const contractName = extractContractName(code);
+
+      // Step 1: Compile code and get unsigned transaction
+      toast.loading('Compiling code...', { id: 'deploy' });
+      const compileResult = await compileCode({
+        source: code,
+        moduleName: contractName,
+        senderAddress: address.toString()
+      });
+
+      if (!compileResult.success) {
+        toast.error(compileResult.error || 'Compilation failed', { id: 'deploy' });
+        return;
+      }
+
+      // Step 2: Sign the transaction with wallet
+      toast.loading('Please sign the transaction in your wallet...', { id: 'deploy' });
+      
+      let signedTransaction: any;
+      
+      try {
+        console.log('Raw compile result:', compileResult);
+        console.log('Compile result success:', compileResult.success);
+        console.log('Unsigned transaction exists:', !!compileResult.unsignedTransaction);
+        console.log('Unsigned transaction type:', typeof compileResult.unsignedTransaction);
+        
+        if (!compileResult.unsignedTransaction) {
+          throw new Error('No unsigned transaction received from server');
+        }
+        
+        // Check if wallet is available and connected
+        if (!signTransaction) {
+          throw new Error('Wallet signing not available. Please connect your wallet.');
+        }
+        
+        if (!isConnected) {
+          throw new Error('Wallet is not connected. Please connect your wallet first.');
+        }
+        
+        console.log('Wallet connected:', isConnected);
+        console.log('Sign function available:', !!signTransaction);
+        
+        // Reconstruct BigInts from strings if needed
+        const reconstructedTransaction = JSON.parse(JSON.stringify(compileResult.unsignedTransaction, (key, value) => {
+          // Convert string numbers that look like BigInts back to BigInts
+          if (typeof value === 'string') {
+            // Check if it's a numeric string that should be a BigInt
+            if (/^\d+$/.test(value)) {
+              // If it's longer than 15 digits, it's likely a BigInt
+              if (value.length > 15) {
+                try {
+                  return BigInt(value);
+                } catch (e) {
+                  console.warn('Failed to convert to BigInt:', value, e);
+                  return value;
+                }
+              }
+              // If it's a reasonable number, convert to number
+              else if (value.length <= 15) {
+                return parseInt(value);
+              }
+            }
+          }
+          return value;
+        }));
+        
+        // Try signing the raw transaction from the server (no reconstruction)
+        console.log('Attempting to sign raw transaction from server...');
+        
+        // Try signing with timeout
+        const signPromise = signTransaction(compileResult.unsignedTransaction);
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Wallet signing timeout')), 30000)
+        );
+        
+        signedTransaction = await Promise.race([signPromise, timeoutPromise]);
+        console.log('Signed transaction:', signedTransaction);
+      } catch (signError) {
+        console.error('Wallet signing error:', signError);
+        toast.error(`Wallet signing failed: ${signError?.message || 'Please check your wallet connection'}`, { id: 'deploy' });
+        return;
+      }
+
+      // Step 3: Submit the signed transaction
+      toast.loading('Submitting transaction...', { id: 'deploy' });
+      const submitResult = await submitSignedTransaction({
+        signedTransaction,
+        moduleName: contractName,
+        network: 'testnet'
+      });
+
+      if (submitResult.success) {
+        toast.success(`Deployment successful! Transaction: ${submitResult.txHash}`, { id: 'deploy' });
+        setOutputTab("deploy");
+        // Refresh deployments list
+        await fetchDeployments();
+      } else {
+        toast.error(submitResult.error || 'Transaction submission failed', { id: 'deploy' });
+      }
+    } catch (err) {
+      console.error('Deployment error:', err);
+      toast.error(`Deployment failed: ${err.message || 'Unknown error'}`, { id: 'deploy' });
+    }
+  };
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(true);
 
   return (
@@ -97,11 +251,14 @@ export function PlaygroundPage() {
             onValidate={handleValidate}
             onAnalyze={handleAnalyze}
             onEstimateGas={handleEstimateGas}
+            onDeploy={handleDeploy}
             onReset={handleReset}
             onDownload={handleDownload}
             isCompiling={isCompiling}
             isValidating={isValidating}
             isAnalyzing={isAnalyzing}
+            isDeploying={isDeploying}
+            isWalletConnected={isConnected}
             onToggleSidebar={() => setSidebarOpen((s) => !s)}
           />
 
@@ -161,6 +318,11 @@ export function PlaygroundPage() {
                         onClick={() => setOutputTab("gas")}
                         label="Gas"
                       />
+                      <TabButton
+                        active={outputTab === "deploy"}
+                        onClick={() => setOutputTab("deploy")}
+                        label="Deploy"
+                      />
                     </div>
 
                     {/* Tab Content */}
@@ -184,6 +346,11 @@ export function PlaygroundPage() {
                         <GasPanel
                           code={code}
                           theme={theme}
+                        />
+                      )}
+                      {outputTab === "deploy" && (
+                        <DeploymentPanel
+                          isActive={outputTab === "deploy"}
                         />
                       )}
                     </div>

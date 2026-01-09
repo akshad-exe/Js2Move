@@ -4,7 +4,7 @@ import toast from 'react-hot-toast';
 // Create axios instance
 export const apiClient: AxiosInstance = axios.create({
   baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1',
-  timeout: 10000,
+  timeout: 60000, // Increased to 60 seconds for blockchain operations
   headers: {
     'Content-Type': 'application/json',
   },

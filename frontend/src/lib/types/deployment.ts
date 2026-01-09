@@ -1,8 +1,9 @@
 export interface DeploymentRequest {
   source: string;
-  accountAddress: string;
   network?: string;
+  moduleName?: string;
   gasLimit?: number;
+  moveToml?: string;
 }
 
 export interface DeploymentResponse {
@@ -22,6 +23,7 @@ export interface Deployment {
   timestamp: string;
   gasUsed?: number;
   error?: string;
+  moduleName?: string;
 }
 
 export interface DeploymentStatus {

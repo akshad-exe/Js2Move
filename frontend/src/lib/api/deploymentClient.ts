@@ -8,6 +8,36 @@ import type {
 } from '../types';
 
 /**
+ * Compile MoveJS code to bytecode for client-side signing
+ */
+export async function compileCode(request: { source: string; moduleName?: string; senderAddress: string }): Promise<any> {
+  try {
+    const response = await apiClient.post('/public/deploy/compile', request);
+    return response.data;
+  } catch (error) {
+    console.error('Compilation error:', error);
+    throw error;
+  }
+}
+
+/**
+ * Submit signed transaction to blockchain
+ */
+export async function submitSignedTransaction(request: { 
+  signedTransaction: any; 
+  moduleName: string; 
+  network?: string 
+}): Promise<any> {
+  try {
+    const response = await apiClient.post('/public/deploy/submit', request);
+    return response.data;
+  } catch (error) {
+    console.error('Transaction submission error:', error);
+    throw error;
+  }
+}
+
+/**
  * Deploy a compiled contract
  */
 export async function deployContract(request: DeploymentRequest): Promise<DeploymentResponse | null> {
@@ -37,7 +67,9 @@ export async function deployContract(request: DeploymentRequest): Promise<Deploy
 export async function getDeployments(): Promise<Deployment[]> {
   try {
     const response = await apiClient.get<Deployment[]>('/public/deployments');
-    return response.data || [];
+    // Ensure we always return an array
+    const data = response.data;
+    return Array.isArray(data) ? data : [];
   } catch (error) {
     console.error('Failed to fetch deployments:', error);
     return [];

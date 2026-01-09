@@ -30,8 +30,10 @@ export function useDeployment() {
     setLoading(true);
     try {
       const data = await getDeployments();
-      setDeployments(data);
-      return data;
+      // Ensure data is always an array
+      const deploymentsArray = Array.isArray(data) ? data : [];
+      setDeployments(deploymentsArray);
+      return deploymentsArray;
     } finally {
       setLoading(false);
     }

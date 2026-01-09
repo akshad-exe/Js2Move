@@ -10,7 +10,7 @@ export function Navbar() {
     const [copied, setCopied] = useState(false);
 
     const location = useLocation();
-    const { connect, disconnect, address, formattedAddress, isConnected, hasWallet } = useWallet();
+    const { connect, disconnect, address, formattedAddress, isConnected, hasWallet, balance, isCheckingBalance } = useWallet();
 
     // I'll handle the scroll effect here to update the navbar background
     useEffect(() => {
@@ -43,9 +43,11 @@ export function Navbar() {
 
                     {/* The logo and brand name */}
                     <Link to="/" className="flex items-center gap-2 group z-50 relative">
-                        <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center text-white font-bold text-lg shadow-lg group-hover:shadow-purple-500/25 transition-all">
-                            M
-                        </div>
+                        <img 
+                            src="/assets/logo/web-app-manifest-192x192.png" 
+                            alt="MoveJS Logo" 
+                            className="w-9 h-9 rounded-xl shadow-lg group-hover:shadow-purple-500/25 transition-all"
+                        />
                         <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-400">
                             MoveJS
                         </span>
@@ -74,12 +76,14 @@ export function Navbar() {
                             Join Waitlist
                         </Link>
 
-                        {/* I'm using the RazorWalletButton here to handle connections */}
-                        <RazorWalletButton
+                        {/* I'm using the WalletButton here to handle connections */}
+                        <WalletButton
                             isConnected={isConnected}
                             address={address ? address.toString() : undefined}
                             formattedAddress={formattedAddress}
                             hasWallet={hasWallet}
+                            balance={balance}
+                            isCheckingBalance={isCheckingBalance}
                             onConnect={connect}
                             onDisconnect={disconnect}
                             onCopy={copyAddress}
@@ -150,27 +154,31 @@ export function Navbar() {
 
 // I've split out some helper components here to keep the main Navbar clean
 
-type RazorWalletButtonProps = {
+type WalletButtonProps = {
     isConnected: boolean;
     address?: string | undefined;
     formattedAddress?: string | undefined;
     hasWallet: boolean;
+    balance?: string | null;
+    isCheckingBalance?: boolean;
     onConnect: () => void;
     onDisconnect: () => void;
     onCopy: () => void;
     copied: boolean;
 };
 
-function RazorWalletButton({
+function WalletButton({
     isConnected,
     address,
     formattedAddress,
     hasWallet,
+    balance,
+    isCheckingBalance,
     onConnect,
     onDisconnect,
     onCopy,
     copied
-}: RazorWalletButtonProps) {
+}: WalletButtonProps) {
     const [showDropdown, setShowDropdown] = useState(false);
 
     // This is what we show when the user is already connected
@@ -195,8 +203,14 @@ function RazorWalletButton({
 
                             {/* Showing the full address in a small info box */}
                             <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50">
-                                <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Connected to Movement Network </p>
-                                <p className="text-xs font-mono text-gray-700 dark:text-gray-300 break-all">{address?.toString()}</p>
+                                <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Connected to Movement Network</p>
+                                <p className="text-xs font-mono text-gray-700 dark:text-gray-300 break-all mb-2">{address?.toString()}</p>
+                                <div className="flex items-center justify-between">
+                                    <span className="text-xs text-gray-500 dark:text-gray-400">Balance:</span>
+                                    <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">
+                                        {isCheckingBalance ? 'Checking...' : `${balance ? parseFloat(balance).toFixed(4) : '0.0000'} MOVE`}
+                                    </span>
+                                </div>
                             </div>
 
                             {/* Button to copy the address */}
@@ -227,17 +241,17 @@ function RazorWalletButton({
         );
     }
 
-    // If they don't have the wallet, I'll prompt them to install it
+    // If they don't have the wallet, I'll prompt them to install Nightly (preferred)
     if (!hasWallet) {
         return (
             <a
-                href="https://chromewebstore.google.com/detail/razor-wallet/fdcnegogpncmocked6eias4h4xkpjpdh"
+                href="https://nightly.app/download"
                 target="_blank"
                 rel="noreferrer"
                 className="flex items-center gap-2 px-5 py-2 rounded-lg bg-gradient-to-r from-purple-600 to-pink-600 text-white font-semibold text-sm hover:opacity-90 transition-all shadow-lg shadow-purple-500/20"
             >
                 <Wallet className="w-4 h-4" />
-                Install Razor
+                Install Nightly
                 <ExternalLink className="w-3 h-3" />
             </a>
         );

@@ -1,5 +1,14 @@
 # Ignore all packages except frontend
-packages/
+packages/backend/
+packages/cli/
+packages/compiler/
+packages/sdk/
+packages/shared-types/
+
+# Keep package.json files for workspace resolution
+!packages/*/package.json
+
+# Ignore docs and other non-build files
 docs/
 docker/
 infra/

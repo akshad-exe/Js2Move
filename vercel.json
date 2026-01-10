@@ -3,6 +3,5 @@
   "outputDirectory": "frontend/dist",
   "installCommand": "pnpm install --frozen-lockfile",
   "framework": "vite",
-  "rootDirectory": "frontend",
   "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
 }

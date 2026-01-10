@@ -6,7 +6,11 @@ packages/sdk/
 packages/shared-types/
 
 # Keep package.json files for workspace resolution
-!packages/*/package.json
+!packages/backend/package.json
+!packages/cli/package.json
+!packages/compiler/package.json
+!packages/sdk/package.json
+!packages/shared-types/package.json
 
 # Ignore docs and other non-build files
 docs/

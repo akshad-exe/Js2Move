@@ -24,7 +24,10 @@ export function PlaygroundPage() {
   const { compile, isCompiling, output, error, setOutput, setError, validate, isValidating, analyze, isAnalyzing } = useCompiler();
   const { isDeploying, fetchDeployments } = useDeployment();
   const { isConnected, address } = useWallet();
-  const { signTransaction } = useAptosWallet();
+  const { signTransaction, signAndSubmitTransaction } = useAptosWallet();
+  
+  console.log('Wallet adapter methods:', Object.keys(useAptosWallet()));
+  console.log('SignTransaction function:', signTransaction);
   const [validationOutput, setValidationOutput] = useState("");
 
   // Check wallet balance when wallet connects
@@ -162,20 +165,18 @@ export function PlaygroundPage() {
           throw new Error('No unsigned transaction received from server');
         }
         
-        // Check if wallet is available and connected
-        if (!signTransaction) {
+        // Check if wallet signing methods are available
+        if (!signTransaction && !signAndSubmitTransaction) {
           throw new Error('Wallet signing not available. Please connect your wallet.');
         }
         
-        if (!isConnected) {
-          throw new Error('Wallet is not connected. Please connect your wallet first.');
-        }
-        
-        console.log('Wallet connected:', isConnected);
-        console.log('Sign function available:', !!signTransaction);
+        console.log('Available signing methods:', {
+          signTransaction: !!signTransaction,
+          signAndSubmitTransaction: !!signAndSubmitTransaction
+        });
         
         // Reconstruct BigInts from strings if needed
-        const reconstructedTransaction = JSON.parse(JSON.stringify(compileResult.unsignedTransaction, (key, value) => {
+        JSON.parse(JSON.stringify(compileResult.unsignedTransaction, (_key, value) => {
           // Convert string numbers that look like BigInts back to BigInts
           if (typeof value === 'string') {
             // Check if it's a numeric string that should be a BigInt
@@ -198,24 +199,57 @@ export function PlaygroundPage() {
           return value;
         }));
         
-        // Try signing the raw transaction from the server (no reconstruction)
-        console.log('Attempting to sign raw transaction from server...');
+        // Try signing the raw transaction from the server
+        console.log('Attempting to sign transaction...');
+        console.log('Transaction to sign:', compileResult.unsignedTransaction);
+        console.log('Transaction type:', typeof compileResult.unsignedTransaction);
         
-        // Try signing with timeout
-        const signPromise = signTransaction(compileResult.unsignedTransaction);
+        if (!compileResult.unsignedTransaction) {
+          throw new Error('No transaction to sign');
+        }
+        
+        // Use signAndSubmitTransaction if available (preferred), otherwise use signTransaction
+        let signPromise;
+        let usedSignAndSubmit = false;
+        if (signAndSubmitTransaction) {
+          console.log('Using signAndSubmitTransaction');
+          signPromise = signAndSubmitTransaction(compileResult.unsignedTransaction);
+          usedSignAndSubmit = true;
+        } else if (signTransaction) {
+          console.log('Using signTransaction');
+          signPromise = signTransaction(compileResult.unsignedTransaction);
+        } else {
+          throw new Error('No signing method available');
+        }
+        
         const timeoutPromise = new Promise((_, reject) => 
           setTimeout(() => reject(new Error('Wallet signing timeout')), 30000)
         );
         
         signedTransaction = await Promise.race([signPromise, timeoutPromise]);
-        console.log('Signed transaction:', signedTransaction);
+        console.log('Transaction result:', signedTransaction);
+        
+        // If using signAndSubmitTransaction, the transaction is already submitted
+        if (usedSignAndSubmit) {
+          console.log('Transaction submitted via wallet, checking result...');
+          // The result should contain the transaction hash
+          if (signedTransaction?.hash) {
+            toast.success(`Deployment successful! Transaction: ${signedTransaction.hash}`, { id: 'deploy' });
+            setOutputTab("deploy");
+            await fetchDeployments();
+            return;
+          } else {
+            throw new Error('Transaction submission failed - no hash returned');
+          }
+        }
       } catch (signError) {
         console.error('Wallet signing error:', signError);
-        toast.error(`Wallet signing failed: ${signError?.message || 'Please check your wallet connection'}`, { id: 'deploy' });
+        const errorMessage = signError instanceof Error ? signError.message : 'Please check your wallet connection';
+        toast.error(`Wallet signing failed: ${errorMessage}`, { id: 'deploy' });
         return;
       }
 
-      // Step 3: Submit the signed transaction
+      // Step 3: Submit the signed transaction (only if we used signTransaction)
       toast.loading('Submitting transaction...', { id: 'deploy' });
       const submitResult = await submitSignedTransaction({
         signedTransaction,
@@ -233,7 +267,8 @@ export function PlaygroundPage() {
       }
     } catch (err) {
       console.error('Deployment error:', err);
-      toast.error(`Deployment failed: ${err.message || 'Unknown error'}`, { id: 'deploy' });
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+      toast.error(`Deployment failed: ${errorMessage}`, { id: 'deploy' });
     }
   };
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(true);

@@ -1,0 +1,26 @@
+# Ignore all packages except frontend
+packages/
+docs/
+docker/
+infra/
+scripts/
+test-deployment/
+
+# Ignore documentation files
+*.md
+
+# Ignore testing and config files that don't affect frontend
+LICENSE
+test-compile.js
+POSTMAN_*.json
+HBS_TEMPLATE_GUIDE.md
+
+# Ignore all dotfiles and root config files except what Vercel needs
+.*
+!.env.example
+!.env.local
+!.gitignore
+
+# Keep only frontend
+!frontend/
+

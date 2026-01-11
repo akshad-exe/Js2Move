@@ -129,17 +129,30 @@ export default function DeploymentPanel({ isActive }: DeploymentPanelProps) {
                       </p>
                     </div>
                   </div>
-                  {deployment.txHash && (
-                    <a
-                      href={`https://explorer.movementnetwork.xyz/?network=testnet&txn=${deployment.txHash}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="p-1 rounded-md hover:bg-black/10 transition-colors"
-                      title="View on Explorer"
-                    >
-                      <ExternalLink className="w-3 h-3" />
-                    </a>
-                  )}
+                  <div className="flex gap-1">
+                    {deployment.txHash && (
+                      <a
+                        href={`https://explorer.movementnetwork.xyz/txn/${deployment.txHash}/userTxnOverview?network=bardock+testnet`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="p-1 rounded-md hover:bg-black/10 transition-colors"
+                        title="View Transaction"
+                      >
+                        <ExternalLink className="w-3 h-3" />
+                      </a>
+                    )}
+                    {deployment.address && (
+                      <a
+                        href={`https://explorer.movementnetwork.xyz/account/${deployment.address}?network=bardock+testnet`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="p-1 rounded-md hover:bg-black/10 transition-colors"
+                        title="View Contract"
+                      >
+                        <ExternalLink className="w-3 h-3" />
+                      </a>
+                    )}
+                  </div>
                 </div>
 
                 {deployment.address && (

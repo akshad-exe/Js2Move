@@ -24,7 +24,8 @@ export async function compileCode(request: { source: string; moduleName?: string
  * Submit signed transaction to blockchain
  */
 export async function submitSignedTransaction(request: { 
-  signedTransaction: any; 
+  signedTransaction?: any;
+  unsignedTransaction?: any;
   moduleName: string; 
   network?: string 
 }): Promise<any> {
@@ -66,10 +67,12 @@ export async function deployContract(request: DeploymentRequest): Promise<Deploy
  */
 export async function getDeployments(): Promise<Deployment[]> {
   try {
-    const response = await apiClient.get<Deployment[]>('/public/deployments');
-    // Ensure we always return an array
+    const response = await apiClient.get<{ deployments: Deployment[] }>('/public/deployments');
+    // Backend returns { deployments: [...] }, extract the array
     const data = response.data;
-    return Array.isArray(data) ? data : [];
+    const deploymentsList = (data && data.deployments) ? data.deployments : [];
+    console.log('Fetched deployments:', deploymentsList);
+    return Array.isArray(deploymentsList) ? deploymentsList : [];
   } catch (error) {
     console.error('Failed to fetch deployments:', error);
     return [];

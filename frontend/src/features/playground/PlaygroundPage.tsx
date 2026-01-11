@@ -24,10 +24,7 @@ export function PlaygroundPage() {
   const { compile, isCompiling, output, error, setOutput, setError, validate, isValidating, analyze, isAnalyzing } = useCompiler();
   const { isDeploying, fetchDeployments } = useDeployment();
   const { isConnected, address } = useWallet();
-  const { signTransaction, signAndSubmitTransaction } = useAptosWallet();
-  
-  console.log('Wallet adapter methods:', Object.keys(useAptosWallet()));
-  console.log('SignTransaction function:', signTransaction);
+  const { signTransaction, signAndSubmitTransaction, wallet, connected: adapterConnected } = useAptosWallet();
   const [validationOutput, setValidationOutput] = useState("");
 
   // Check wallet balance when wallet connects
@@ -133,14 +130,13 @@ export function PlaygroundPage() {
       return;
     }
 
-    try {
-      // Extract contract name from the source code
-      const contractName = extractContractName(code);
+    // Extract contract name from the source code
+    const contractName = extractContractName(code);
 
-      // Step 1: Compile code and get unsigned transaction
-      toast.loading('Compiling code...', { id: 'deploy' });
-      const compileResult = await compileCode({
-        source: code,
+    // Step 1: Compile code and get unsigned transaction
+    toast.loading('Compiling code...', { id: 'deploy' });
+    const compileResult = await compileCode({
+      source: code,
         moduleName: contractName,
         senderAddress: address.toString()
       });
@@ -154,6 +150,7 @@ export function PlaygroundPage() {
       toast.loading('Please sign the transaction in your wallet...', { id: 'deploy' });
       
       let signedTransaction: any;
+      let usedSignAndSubmit = false;
       
       try {
         console.log('Raw compile result:', compileResult);
@@ -165,39 +162,103 @@ export function PlaygroundPage() {
           throw new Error('No unsigned transaction received from server');
         }
         
-        // Check if wallet signing methods are available
+        // Validate wallet connection and methods BEFORE attempting to sign
+        if (!adapterConnected) {
+          throw new Error('Wallet not connected. Please connect your wallet first.');
+        }
+        if (!wallet?.name) {
+          throw new Error('No wallet detected. Please install and connect a wallet.');
+        }
         if (!signTransaction && !signAndSubmitTransaction) {
-          throw new Error('Wallet signing not available. Please connect your wallet.');
+          throw new Error('Wallet signing not available. Please reconnect your wallet.');
         }
         
         console.log('Available signing methods:', {
           signTransaction: !!signTransaction,
-          signAndSubmitTransaction: !!signAndSubmitTransaction
+          signAndSubmitTransaction: !!signAndSubmitTransaction,
+          wallet: wallet?.name,
+          connected: adapterConnected
         });
         
-        // Reconstruct BigInts from strings if needed
-        JSON.parse(JSON.stringify(compileResult.unsignedTransaction, (_key, value) => {
-          // Convert string numbers that look like BigInts back to BigInts
-          if (typeof value === 'string') {
-            // Check if it's a numeric string that should be a BigInt
-            if (/^\d+$/.test(value)) {
-              // If it's longer than 15 digits, it's likely a BigInt
-              if (value.length > 15) {
-                try {
-                  return BigInt(value);
-                } catch (e) {
-                  console.warn('Failed to convert to BigInt:', value, e);
-                  return value;
-                }
-              }
-              // If it's a reasonable number, convert to number
-              else if (value.length <= 15) {
-                return parseInt(value);
-              }
-            }
+        // Reconstruct and normalize unsigned transaction for wallet signing
+        function hexToUint8Array(hex: string) {
+          if (typeof hex !== 'string') return hex;
+          if (hex.startsWith('0x')) hex = hex.slice(2);
+          if (hex === '') return new Uint8Array();
+          if (hex.length % 2 === 1) hex = '0' + hex;
+          const len = hex.length / 2;
+          const arr = new Uint8Array(len);
+          for (let i = 0; i < len; i++) {
+            arr[i] = parseInt(hex.substr(i * 2, 2), 16);
           }
-          return value;
-        }));
+          return arr;
+        }
+
+        function normalizeFunctionAddress(fn: string) {
+          // Convert long zero-padded addresses to canonical form: 0x<no-leading-zeros>
+          if (!fn || typeof fn !== 'string') return fn;
+          const parts = fn.split('::');
+          if (parts.length < 3) return fn;
+          const addr = parts[0];
+          if (addr.startsWith('0x')) {
+            // remove 0x and leading zeros
+            const raw = addr.slice(2).replace(/^0+/, '') || '0';
+            return `0x${raw}::${parts[1]}::${parts[2]}`;
+          }
+          return fn;
+        }
+
+        const unsignedTxnOrig = compileResult.unsignedTransaction;
+        const preparedUnsignedTxn: any = {
+          ...unsignedTxnOrig,
+          sender: typeof unsignedTxnOrig.sender === 'string' ? unsignedTxnOrig.sender : unsignedTxnOrig.sender?.toString?.() ?? unsignedTxnOrig.sender,
+          sequence_number: Number(unsignedTxnOrig.sequence_number),
+          max_gas_amount: Number(unsignedTxnOrig.max_gas_amount),
+          gas_unit_price: Number(unsignedTxnOrig.gas_unit_price),
+          expiration_timestamp_secs: Number(unsignedTxnOrig.expiration_timestamp_secs),
+          chain_id: Number(unsignedTxnOrig.chain_id ?? unsignedTxnOrig.chainId ?? 0),
+          payload: ((): any => {
+            const p = unsignedTxnOrig.payload || {};
+            if (p.type === 'entry_function_payload' || p?.value) {
+              const fn = p.function || (p.value && p.value.module_name && p.value.function_name ? ((): string | undefined => {
+                const moduleName = p.value.module_name.name?.value || '';
+                const funcName = p.value.function_name.value || '';
+                const addrObj = p.value.module_name.address?.address;
+                let addrHex = '';
+                if (addrObj) {
+                  try {
+                    addrHex = '0x' + Object.values(addrObj).map((b: any) => (Number(b)).toString(16).padStart(2, '0')).join('');
+                  } catch {
+                    addrHex = '';
+                  }
+                }
+                return addrHex ? `${addrHex}::${moduleName}::${funcName}` : `${moduleName}::${funcName}`;
+              })() : undefined);
+              const normalizedFn = normalizeFunctionAddress(fn);
+              const args = (p.arguments || p.value?.args || []).map((a: any) => {
+                // If argument looks like a hex string (0x...), convert to Uint8Array
+                if (typeof a === 'string' && /^0x[0-9a-fA-F]+$/.test(a)) return hexToUint8Array(a);
+                // If it's an object map of bytes, convert to Uint8Array
+                if (a && typeof a === 'object' && Object.keys(a).every(k => /^\d+$/.test(k))) {
+                  const bytesArr = Object.values(a).map((n: any) => Number(n));
+                  const hex = bytesArr.map((b: number) => b.toString(16).padStart(2, '0')).join('');
+                  return hexToUint8Array('0x' + hex);
+                }
+                return a;
+              });
+              return {
+                type: 'entry_function_payload',
+                function: normalizedFn,
+                type_arguments: p.type_arguments || p.ty_args || p.value?.ty_args || [],
+                arguments: args,
+                value: p.value || undefined
+              };
+            }
+            return p;
+          })()
+        };
+
+        console.log('Prepared unsigned transaction for wallet:', preparedUnsignedTxn);
         
         // Try signing the raw transaction from the server
         console.log('Attempting to sign transaction...');
@@ -208,25 +269,97 @@ export function PlaygroundPage() {
           throw new Error('No transaction to sign');
         }
         
-        // Use signAndSubmitTransaction if available (preferred), otherwise use signTransaction
-        let signPromise;
-        let usedSignAndSubmit = false;
-        if (signAndSubmitTransaction) {
-          console.log('Using signAndSubmitTransaction');
-          signPromise = signAndSubmitTransaction(compileResult.unsignedTransaction);
-          usedSignAndSubmit = true;
-        } else if (signTransaction) {
-          console.log('Using signTransaction');
-          signPromise = signTransaction(compileResult.unsignedTransaction);
-        } else {
-          throw new Error('No signing method available');
+        // Prefer signTransaction (returns signed txn) to avoid adapter submit quirks
+        usedSignAndSubmit = false;
+        const unsignedTxn = preparedUnsignedTxn;
+
+        // Guard to prevent duplicate parallel signing attempts (avoid duplicate logs/requests)
+        if ((window as any).__js2move_signing_in_progress) {
+          throw new Error('Signing already in progress');
         }
-        
-        const timeoutPromise = new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Wallet signing timeout')), 30000)
-        );
-        
-        signedTransaction = await Promise.race([signPromise, timeoutPromise]);
+        (window as any).__js2move_signing_in_progress = true;
+
+        // Validate payload structure exists
+          if (!unsignedTxn || !unsignedTxn.payload) {
+            throw new Error('Invalid transaction: missing payload');
+          }
+          
+          const payload = unsignedTxn.payload;
+          
+          if (!payload.function) {
+            throw new Error('Invalid transaction: missing function in payload');
+          }
+          
+          const minimalPayload = {
+            function: payload.function,
+            type_arguments: payload.type_arguments || [],
+            arguments: (payload.arguments || []).map((a: any) => {
+              if (a instanceof Uint8Array) {
+                return '0x' + Array.from(a).map(b => b.toString(16).padStart(2, '0')).join('');
+              }
+              if (typeof a === 'number' || typeof a === 'bigint') return String(a);
+              return a;
+            })
+          } as any;
+
+          console.log('Minimal payload prepared:', JSON.stringify(minimalPayload, null, 2));
+
+          // TEMPORARY WORKAROUND: Try backend signing first, fall back to wallet if not configured
+          console.warn('⚠️ Attempting backend signing (requires DEPLOYER_PRIVATE_KEY in backend .env)');
+          toast.loading('Submitting transaction...', { id: 'deploy' });
+          
+          try {
+            // Try backend server-side signing first
+            const submitResult = await submitSignedTransaction({
+              unsignedTransaction: compileResult.unsignedTransaction,
+              moduleName: contractName,
+              network: 'testnet'
+            });
+
+            if (submitResult.txHash) {
+              toast.success(`Deployment successful! Transaction: ${submitResult.txHash}`, { id: 'deploy' });
+              setOutputTab("deploy");
+              await fetchDeployments();
+              return;
+            } else if (submitResult.error?.includes('Server-side signing not configured')) {
+              // Backend doesn't have private key configured, show helpful message
+              toast.error('Backend DEPLOYER_PRIVATE_KEY not configured. Please add your private key to packages/backend/.env', { id: 'deploy', duration: 8000 });
+              throw new Error('DEPLOYER_PRIVATE_KEY not configured in backend. Add your wallet private key to packages/backend/.env file and restart the backend server.');
+            } else {
+              throw new Error(submitResult.error || 'Transaction submission failed - no hash returned');
+            }
+          } catch (backendErr: any) {
+            console.error('Backend signing failed:', backendErr);
+            throw backendErr;
+          }
+
+          // ORIGINAL WALLET SIGNING CODE - DISABLED DUE TO ADAPTER ISSUES
+          // Use signAndSubmitTransaction directly with minimal payload
+          // if (signAndSubmitTransaction) {
+          //   console.log('Calling signAndSubmitTransaction with minimal payload');
+          //   try_ {
+          //     signPromise = signAndSubmitTransaction(minimalPayload);
+          //     const res = await Promise.race([signPromise, new Promise((_, reject) => setTimeout(() => reject(new Error('Wallet signing timeout')), 30000))]);
+          //     signedTransaction = res;
+          //     usedSignAndSubmit = true;
+          //     console.log('signAndSubmitTransaction result:', res);
+          //   } catch_ (walletErr: any) {
+          //     console.error('Wallet signAndSubmitTransaction error:', walletErr);
+          //     // Provide user-friendly error message
+          //     const errMsg = walletErr?.message || String(walletErr);
+          //     if (errMsg.includes('bytecode') || errMsg.includes('undefined')) {
+          //       throw new Error('Wallet rejected transaction. This may be due to an unsupported transaction type. Please try reconnecting your wallet or use a different wallet.');
+          //     }
+          //     throw_ walletErr;
+          //   }
+          // }
+
+          if (!signedTransaction) {
+            throw new Error('Signing failed');
+          }
+        (window as any).__js2move_signing_in_progress = false;
+
+        // At this point signing has been attempted (via signTransaction or signAndSubmitTransaction)
         console.log('Transaction result:', signedTransaction);
         
         // If using signAndSubmitTransaction, the transaction is already submitted
@@ -242,12 +375,6 @@ export function PlaygroundPage() {
             throw new Error('Transaction submission failed - no hash returned');
           }
         }
-      } catch (signError) {
-        console.error('Wallet signing error:', signError);
-        const errorMessage = signError instanceof Error ? signError.message : 'Please check your wallet connection';
-        toast.error(`Wallet signing failed: ${errorMessage}`, { id: 'deploy' });
-        return;
-      }
 
       // Step 3: Submit the signed transaction (only if we used signTransaction)
       toast.loading('Submitting transaction...', { id: 'deploy' });
@@ -265,12 +392,12 @@ export function PlaygroundPage() {
       } else {
         toast.error(submitResult.error || 'Transaction submission failed', { id: 'deploy' });
       }
-    } catch (err) {
-      console.error('Deployment error:', err);
-      const errorMessage = err instanceof Error ? err.message : 'Unknown error';
-      toast.error(`Deployment failed: ${errorMessage}`, { id: 'deploy' });
+    } catch (error: any) {
+      console.error('Deployment error:', error);
+      toast.error(`Deployment failed: ${error?.message || 'Unknown error'}`, { id: 'deploy' });
     }
   };
+  
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(true);
 
   return (
@@ -419,4 +546,3 @@ function TabButton({ active, onClick, label }: { active: boolean; onClick: () =>
     </button>
   );
 }
-

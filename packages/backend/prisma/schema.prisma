@@ -1,5 +1,6 @@
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "windows", "debian-openssl-3.0.x"]
 }
 
 datasource db {
@@ -11,6 +12,7 @@ model Deployment {
   id              String   @id @default(cuid())
   source          String
   compiledCode    String
+  moveToml        String?   // optional Move.toml provided by the user
   contractAddress String?
   txHash          String   @unique
   network         String

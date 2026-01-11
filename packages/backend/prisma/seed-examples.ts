@@ -12,7 +12,8 @@ async function loadExamples() {
     '01': { name: 'Hello World', description: 'Simplest possible contract showing basic structure and syntax', difficulty: 'beginner' },
     '02': { name: 'Simple Token', description: 'Basic token with balance tracking, transfer functions, and access control', difficulty: 'beginner' },
     '03': { name: 'NFT Contract', description: 'Non-fungible token pattern with minting and transfer capabilities', difficulty: 'intermediate' },
-    '04': { name: 'DeFi Vault', description: 'Advanced DeFi pattern with deposits, withdrawals, and yield farming', difficulty: 'advanced' }
+    '04': { name: 'DeFi Vault', description: 'Advanced DeFi pattern with deposits, withdrawals, and yield farming', difficulty: 'advanced' },
+    '05': { name: 'Voting Contract', description: 'Democratic voting system with proposals, voting, and result tallying', difficulty: 'intermediate' }
   };
 
   for (const filename of files) {

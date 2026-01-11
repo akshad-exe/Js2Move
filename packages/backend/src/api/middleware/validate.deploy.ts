@@ -19,5 +19,9 @@ export default function validateDeploy(req: Request, res: Response, next: NextFu
     return res.status(400).json({ error: 'Invalid gasLimit, must be a number' });
   }
 
+  if (req.body.moveToml && typeof req.body.moveToml !== 'string') {
+    return res.status(400).json({ error: 'Invalid moveToml, must be a string containing Move.toml content' });
+  }
+
   next();
 }

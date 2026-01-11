@@ -3,7 +3,7 @@ import router from '@/api/routes';
 import { requestLogger } from '@/config/logger';
 import { isDbConnected } from '@/config/database';
 import logger from '@/config/logger';
-import { CORS_ORIGINS, CORS_ALLOW_CREDENTIALS, CORS_MAX_AGE } from '@/config/envVars';
+import { CORS_ORIGINS_ARRAY, CORS_ALLOW_CREDENTIALS, CORS_MAX_AGE } from '@/config/envVars';
 import { errorConverter, errorHandler } from '@/handlers/error.handler';
 import helmet from 'helmet';
 import morgan from 'morgan';
@@ -16,21 +16,38 @@ app.use(express.json());
 app.use(helmet());
 
 // Configure CORS using env-configured origins (production-safe)
-const allowedOrigins = CORS_ORIGINS ?? [] as string[];
+const allowedOrigins = CORS_ORIGINS_ARRAY ?? [];
+
+// Helper to test wildcard matches like '*.ngrok.io' or 'https://*.mydomain.com'
+function originMatchesPattern(origin: string, pattern: string) {
+  if (pattern === '*') return true;
+  // If pattern contains '*' treat as simple wildcard suffix match
+  if (pattern.includes('*')) {
+    const regex = new RegExp('^' + pattern.split('*').map(p => p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('.*') + '$');
+    return regex.test(origin);
+  }
+  return origin === pattern;
+}
+
 const corsOptions: cors.CorsOptions = {
   origin: (origin, cb) => {
-    // allow non-browser tools (no origin)
+    // allow non-browser tools (no origin header, e.g., curl or server-to-server)
     if (!origin) return cb(null, true);
 
-    if (allowedOrigins.length === 0) {
-      // In production prefer explicit list; in non-prod allow unspecified origins
-      if (process.env.NODE_ENV === 'production') return cb(new Error('Not allowed by CORS'), false);
+    // If an explicit "allow all" marker is configured, accept all origins
+    if (allowedOrigins.includes('*')) return cb(null, true);
+
+    // In development, be slightly permissive (allow localhost and 127.0.0.1)
+    if (process.env.NODE_ENV !== 'production' && /localhost|127\.0\.0\.1/.test(origin)) {
       return cb(null, true);
     }
 
-    if (allowedOrigins.includes(origin)) return cb(null, true);
+    // Check configured allowed origins with wildcard support
+    for (const pattern of allowedOrigins) {
+      if (originMatchesPattern(origin, pattern)) return cb(null, true);
+    }
 
-    logger.warn('CORS denied origin', { origin });
+    logger.warn('CORS denied origin', { origin, allowedOrigins });
     return cb(new Error('Not allowed by CORS'), false);
   },
   credentials: CORS_ALLOW_CREDENTIALS,

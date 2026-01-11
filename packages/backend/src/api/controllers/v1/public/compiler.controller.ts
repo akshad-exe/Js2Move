@@ -9,8 +9,20 @@ export const compilerController = {
       return res.status(400).json({ error: 'Missing required field: source (string)' });
     }
 
-    const move = await compile(source);
-    res.json({ move });
+    const result = await compile(source);
+    
+    if (result.success) {
+      // Compilation succeeded
+      return res.json({ success: true, move: result.code });
+    }
+    
+    // Compilation failed - return error with analysis and suggestions
+    return res.status(400).json({
+      success: false,
+      error: result.error,
+      analysis: result.analysis,
+      autoFixOptions: result.autoFixOptions
+    });
   }),
 
   /**

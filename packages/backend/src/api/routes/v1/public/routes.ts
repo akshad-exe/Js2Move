@@ -17,6 +17,8 @@ router.get('/gas/price', publicControllers.gasController.getGasPrice);
 
 // Deployment endpoints
 router.post('/deploy', rateLimitMiddleware, validateDeploy, publicControllers.deploymentController.deploy);
+router.post('/deploy/compile', rateLimitMiddleware, validateCompile, publicControllers.deploymentController.compile);
+router.post('/deploy/submit', rateLimitMiddleware, publicControllers.deploymentController.submit);
 router.get('/deployments', publicControllers.deploymentController.list);
 router.get('/deployment/history', publicControllers.deploymentController.history);
 router.get('/deployment/:id', publicControllers.deploymentController.get);
@@ -30,6 +32,12 @@ router.get('/account/:address', publicControllers.blockchainController.getAccoun
 // Examples endpoints
 router.get('/examples', publicControllers.examplesController.getExamples);
 router.get('/example/:id', publicControllers.examplesController.getExample);
+
+// MoveJS Error Analyzer endpoints
+router.post('/movejs/analyze-error', rateLimitMiddleware, publicControllers.moveJSErrorController.analyzeError);
+router.post('/movejs/validate', rateLimitMiddleware, publicControllers.moveJSErrorController.validate);
+router.post('/movejs/error-report', rateLimitMiddleware, publicControllers.moveJSErrorController.errorReport);
+router.post('/movejs/auto-fix', rateLimitMiddleware, publicControllers.moveJSErrorController.autoFix);
 
 
 export default router;

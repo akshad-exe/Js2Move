@@ -91,7 +91,7 @@ The test will automatically be discovered and run!
 - ✅ Semantic tests (5)
 - ✅ IR tests (5)
 - ✅ Generator tests (5)
-- ✅ Compiler integration tests (5)
+- ✅ Compiler fixture tests (5)
 - ✅ Demo scripts (2)
 
 **Total: 43 tests passing** 🎉

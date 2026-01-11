@@ -10,7 +10,7 @@
 5. **test-ir.js** - IR generation & optimization
 6. **test-generator.js** - Code generation with Handlebars templates
 
-### Integration Tests
+### End-to-End Tests
 7. **test-simple.js** - Basic end-to-end compilation
 8. **test-comprehensive.js** - Full pipeline with all 7 components
 

@@ -65,6 +65,7 @@ export interface DeployRequest {
   accountAddress?: string; // For wallet-based deployment
   moduleName?: string;
   gasLimit?: number;
+  moveToml?: string; // optional Move.toml content to use for deployment
 }
 
 export interface DeployResponse {
@@ -84,6 +85,7 @@ export interface DeployOptions {
   privateKey?: string;
   moduleName?: string;
   gasLimit?: number;
+  moveToml?: string;
 }
 
 export interface DeploymentStatusRequest {

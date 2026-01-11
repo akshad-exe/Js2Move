@@ -86,9 +86,13 @@ Request body:
   "source": "contract Token { ... }",
   "network": "testnet",
   "moduleName": "Token",
-  "gasLimit": 200000
+  "gasLimit": 200000,
+  "moveToml": "[package]\nname = \"augur\"\nversion = \"1.0.0\"\n\n[addresses]\naugur = \"_\"\n\n[dev-addresses]\naugur = \"0xCAFE\"\n\n[dependencies.AptosFramework]\ngit = \"https://github.com/aptos-labs/aptos-framework.git\"\nrev = \"mainnet\"\nsubdir = \"aptos-framework\"\n"
 }
 ```
+Notes:
+- `moveToml` (optional): provide the Move.toml content you want used when constructing the package for deployment. If provided, it will be stored with the deployment and used by the deployment workflow during packaging; otherwise a default Move.toml is generated.
+
 Response (success):
 ```json
 {
@@ -103,19 +107,22 @@ Response (success):
 ### POST /api/v1/public/gas/estimate
 Request body:
 ```json
-{ "source": "contract Token { ... }", "network": "testnet" }
+{ "source": "contract Token { ... }", "network": "testnet", "mode": "fast", "moveToml": "<optional Move.toml content>" }
 ```
-Response:
+Notes:
+- `mode` (optional): `fast` (default) uses a synthetic payload and simulates it — **no compilation**. `accurate` runs a full compile then simulates the exact publish payload (requires `movement` or `aptos` CLI or docker image).
+- `moveToml` (optional): when `mode` is `accurate` you can provide the exact Move.toml content to be used during compilation/packaging. If omitted a minimal Move.toml will be generated.
+- On RPC failures the endpoint will return 502 with `{ "error": "RPC failed !!" }`.
+
+Response (direct GasEstimateResponse):
 ```json
 {
-  "success": true,
-  "estimate": {
-    "gasUnits": 50000,
-    "maxGasUnits": 100000,
-    "gasUnitPrice": 150,
-    "totalCostOctas": 7500000,
-    "totalCostAPT": 0.075
-  }
+  "estimatedGas": 50000,
+  "maxGas": 100000,
+  "gasPrice": 150,               // atomic units (octas)
+  "totalCost": 7500000,         // atomic total cost (octas)
+  "totalCostAPT": 0.075,
+  "currency": "APT"
 }
 ```
 

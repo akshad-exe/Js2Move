@@ -31,9 +31,18 @@ const EnvConfigSchema = z.object({
     .default(false),
 
   // CORS configuration
-  CORS_ORIGINS: z.string().optional(),
+  CORS_ORIGINS: z.union([
+    z.string(),
+    z.array(z.string())
+  ]).optional(),
   CORS_ALLOW_CREDENTIALS: z.coerce.boolean().default(false),
   CORS_MAX_AGE: z.coerce.number().int().nonnegative().default(60 * 60 * 24),
+
+  // Blockchain configuration
+  RPC_ENDPOINT: z.string().url().optional(),
+  CHAIN_ID: z.coerce.number().int().positive().optional(),
+  DEPLOYER_PRIVATE_KEY: z.string().optional(),
+  FAUCET_URL: z.string().url().optional(),
 
 });
 
@@ -44,9 +53,24 @@ const rawConfig = {
   NODE_ENV: process.env.NODE_ENV,
   DATABASE_URL: process.env.DATABASE_URL,
   START_INDEXER: process.env.START_INDEXER,
-  CORS_ORIGINS: process.env.CORS_ORIGINS,
+  CORS_ORIGINS: (() => {
+    const corsOrigins = process.env.CORS_ORIGINS;
+    if (!corsOrigins) return undefined;
+    // Try to parse as JSON array first
+    try {
+      const parsed = JSON.parse(corsOrigins);
+      if (Array.isArray(parsed)) return parsed;
+    } catch {
+      // Not JSON, treat as comma-separated string
+    }
+    return corsOrigins;
+  })(),
   CORS_ALLOW_CREDENTIALS: process.env.CORS_ALLOW_CREDENTIALS,
   CORS_MAX_AGE: process.env.CORS_MAX_AGE,
+  RPC_ENDPOINT: process.env.RPC_ENDPOINT,
+  CHAIN_ID: process.env.CHAIN_ID,
+  DEPLOYER_PRIVATE_KEY: process.env.DEPLOYER_PRIVATE_KEY,
+  FAUCET_URL: process.env.FAUCET_URL,
 };
 
 let envVars: EnvConfig;
@@ -66,10 +90,12 @@ try {
   throw new Error('Environment configuration validation failed. Check environment variables.');
 }
 
-export const { PORT, NODE_ENV,  DATABASE_URL, START_INDEXER, CORS_MAX_AGE, CORS_ALLOW_CREDENTIALS, CORS_ORIGINS } = envVars;
+export const { PORT, NODE_ENV,  DATABASE_URL, START_INDEXER, CORS_MAX_AGE, CORS_ALLOW_CREDENTIALS, CORS_ORIGINS, RPC_ENDPOINT, CHAIN_ID, DEPLOYER_PRIVATE_KEY, FAUCET_URL } = envVars;
 
 export const CORS_ORIGINS_ARRAY = CORS_ORIGINS
-  ? CORS_ORIGINS.split(',').map((s) => s.trim()).filter(Boolean)
+  ? Array.isArray(CORS_ORIGINS)
+    ? CORS_ORIGINS
+    : CORS_ORIGINS.split(',').map((s) => s.trim()).filter(Boolean)
   : undefined;
 
 export default envVars;

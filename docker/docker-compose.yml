@@ -6,7 +6,7 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: template_db
+      POSTGRES_DB: js2move_db
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -14,6 +14,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    ports:
+      - "5432:5432"
 
   redis:
     image: redis:7
@@ -24,59 +26,40 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-
-  dev-node:
-    image: node:18
-    working_dir: /workspace
-    command: sh -c "yarn && yarn hardhat node"
-    volumes:
-      - ../packages/contracts:/workspace
     ports:
-      - "8545:8545"
-    depends_on:
-      - postgres
+      - "6379:6379"
 
   backend:
     build:
       context: ../packages/backend
       dockerfile: Dockerfile
     environment:
-      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/template_db
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/js2move_db
       REDIS_URL: redis://redis:6379
-      RPC_ENDPOINT: http://dev-node:8545
-    volumes:
-      - ../packages/backend:/app
+      RPC_ENDPOINT: https://testnet.movementnetwork.xyz/v1
+      CHAIN_ID: 250
+      NODE_ENV: production
     ports:
-      - "3001:3001"
+      - "8000:8000"
     depends_on:
-      - postgres
-      - redis
-      - dev-node
-
-  indexer:
-    build:
-      context: ../packages/backend
-      dockerfile: Dockerfile
-    environment:
-      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/template_db
-      RPC_ENDPOINT: http://dev-node:8545
-    command: sh -c "node dist/indexer.js"
-    depends_on:
-      - postgres
-      - dev-node
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    command: sh -c "npx prisma migrate deploy && npm start"
 
   frontend:
     build:
       context: ../frontend
       dockerfile: Dockerfile
     environment:
-      NEXT_PUBLIC_API_URL: http://backend:3001
+      NODE_ENV: production
     ports:
       - "3000:3000"
-    volumes:
-      - ../frontend:/app
     depends_on:
       - backend
+    restart: unless-stopped
 
 volumes:
   postgres_data:

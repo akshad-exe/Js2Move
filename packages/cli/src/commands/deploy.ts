@@ -27,9 +27,9 @@ export function deployCommand(program: Command) {
       }
 
       let source = opts.source as string;
-      if (await isFile(source)) {
-        const p = path.resolve(process.cwd(), source);
-        source = await fs.readFile(p, 'utf8');
+      const resolvedPath = path.resolve(process.cwd(), source);
+      if (await isFile(resolvedPath)) {
+        source = await fs.readFile(resolvedPath, 'utf8');
       }
 
       const payload = {

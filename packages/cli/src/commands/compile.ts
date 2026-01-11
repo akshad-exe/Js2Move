@@ -25,8 +25,9 @@ export function compileCommand(program: Command) {
       }
 
       let source = opts.source as string;
-      if (await isFile(source)) {
-        source = await fs.readFile(source, 'utf8');
+      const resolvedPath = path.resolve(process.cwd(), source);
+      if (await isFile(resolvedPath)) {
+        source = await fs.readFile(resolvedPath, 'utf8');
       }
 
       const result = js2moveCompile(source);

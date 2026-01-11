@@ -1,0 +1,83 @@
+// 05-voting-contract.movejs
+// A simple voting system smart contract
+
+/**
+ * VotingContract - Simple Voting System
+ *
+ * This contract demonstrates a basic voting system where:
+ * - Voters can be registered
+ * - Voters can cast votes
+ * - Vote status is tracked per voter
+ */
+contract VotingContract {
+  // Resource to track if an address is registered to vote
+  resource IsRegistered { value: bool };
+
+  // Resource to track if an address has voted
+  resource HasVoted { value: bool };
+
+  // Resource to track the vote choice (simplified to yes/no)
+  resource VoteChoice { value: bool };
+
+  /**
+   * Initialize the voting contract
+   * @param owner - The contract owner
+   */
+  init(owner: address) {
+    // Mark owner as registered
+    IsRegistered[owner] = true;
+    // Owner hasn't voted yet
+    HasVoted[owner] = false;
+  }
+
+  /**
+   * Register a voter
+   * @param registrar - The address registering the voter
+   * @param voter - The address to register
+   */
+  register_voter(registrar: address, voter: address) {
+    // Register the voter
+    IsRegistered[voter] = true;
+    // Voter hasn't voted yet
+    HasVoted[voter] = false;
+  }
+
+  /**
+   * Cast a vote
+   * @param voter - The voter casting the vote
+   * @param choice - The vote choice (true for yes, false for no)
+   */
+  cast_vote(voter: address, choice: bool) {
+    // Mark as voted
+    HasVoted[voter] = true;
+    // Record the vote choice
+    VoteChoice[voter] = choice;
+  }
+
+  /**
+   * Check if voter is registered
+   * @param voter - The voter to check
+   * @returns True if registered
+   */
+  is_registered(voter: address): bool {
+    return IsRegistered[voter];
+  }
+
+  /**
+   * Check if voter has voted
+   * @param voter - The voter to check
+   * @returns True if has voted
+   */
+  has_voted(voter: address): bool {
+    return HasVoted[voter];
+  }
+
+  /**
+   * Get vote choice
+   * @param voter - The voter to check
+   * @returns The vote choice
+   */
+  get_vote_choice(voter: address): bool {
+    return VoteChoice[voter];
+  }
+}

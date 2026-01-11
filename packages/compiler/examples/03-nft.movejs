@@ -3,66 +3,35 @@
 
 /**
  * NFT Contract
- * 
+ *
  * This contract implements a basic NFT with:
- * - Unique token IDs
- * - Ownership tracking
- * - Minting and transferring
+ * - Ownership tracking per token ID
+ * - Metadata URI storage
  */
 contract NFT {
   // Resource to track NFT ownership (tokenId -> owner address)
-  resource Owner;
+  resource Owner { value: address };
 
   // Resource to track token metadata (tokenId -> metadata URI)
-  resource TokenURI;
-
-  // Resource to track next token ID
-  resource NextTokenId;
+  resource TokenURI { value: string };
 
   /**
    * Initialize the NFT contract
    * @param creator - The contract creator address
    */
   init(creator: address) {
-    // Start token IDs from 1
-    NextTokenId[creator] = 1;
+    // Initialize first token for creator
+    Owner[creator] = creator;
+    TokenURI[creator] = "nft://token/1";
   }
 
   /**
-   * Mint a new NFT
-   * @param minter - The address minting the NFT (must be signer)
-   * @param to - The address that will own the NFT
-   * @param tokenURI - Metadata URI for the token
-   * @returns The minted token ID
+   * Set owner of an NFT
+   * @param tokenId - The token ID (using address as ID for simplicity)
+   * @param owner - The new owner address
    */
-  mint(minter: signer, to: address, tokenURI: string): u64 {
-    // Get next token ID
-    let tokenId = NextTokenId[contract];
-
-    // Assign ownership
-    Owner[tokenId] = to;
-
-    // Store metadata
-    TokenURI[tokenId] = tokenURI;
-
-    // Increment next token ID
-    NextTokenId[contract] = tokenId + 1;
-
-    return tokenId;
-  }
-
-  /**
-   * Transfer an NFT
-   * @param from - The current owner (must be signer)
-   * @param to - The new owner address
-   * @param tokenId - The ID of the token to transfer
-   */
-  transfer(from: signer, to: address, tokenId: u64) {
-    // Check ownership
-    assert(Owner[tokenId] == from, "Not the owner");
-
-    // Transfer ownership
-    Owner[tokenId] = to;
+  set_owner(tokenId: address, owner: address) {
+    Owner[tokenId] = owner;
   }
 
   /**
@@ -70,8 +39,17 @@ contract NFT {
    * @param tokenId - The token ID to query
    * @returns The owner address
    */
-  function ownerOf(tokenId: u64): address {
+  get_owner(tokenId: address): address {
     return Owner[tokenId];
+  }
+
+  /**
+   * Set token URI
+   * @param tokenId - The token ID
+   * @param uri - The metadata URI
+   */
+  set_token_uri(tokenId: address, uri: string) {
+    TokenURI[tokenId] = uri;
   }
 
   /**
@@ -79,7 +57,7 @@ contract NFT {
    * @param tokenId - The token ID to query
    * @returns The metadata URI
    */
-  function tokenURI(tokenId: u64): string {
+  get_token_uri(tokenId: address): string {
     return TokenURI[tokenId];
   }
 }

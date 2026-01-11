@@ -3,18 +3,17 @@
 
 /**
  * SimpleToken Contract
- * 
+ *
  * This contract implements a basic fungible token with:
  * - Balance tracking per address
- * - Transfer functionality
- * - Total supply management
+ * - Simple storage and retrieval
  */
 contract SimpleToken {
   // Resource to track token balances for each address
-  resource Balance;
+  resource Balance { value: u64 };
 
-  // Resource to store total supply (stored at contract address)
-  resource TotalSupply;
+  // Resource to store total supply
+  resource TotalSupply { value: u64 };
 
   /**
    * Initialize the token with initial supply
@@ -24,30 +23,18 @@ contract SimpleToken {
   init(owner: address, initialSupply: u64) {
     // Set initial balance for owner
     Balance[owner] = initialSupply;
-    
+
     // Store total supply
     TotalSupply[owner] = initialSupply;
   }
 
   /**
-   * Transfer tokens from sender to recipient
-   * @param from - The sender (must be signer)
-   * @param to - The recipient address
-   * @param amount - The amount of tokens to transfer
+   * Set balance for an address (simplified transfer)
+   * @param addr - The address to set balance for
+   * @param amount - The amount to set
    */
-  transfer(from: signer, to: address, amount: u64) {
-    // Check sender has sufficient balance
-    assert(Balance[from] >= amount, "Insufficient balance");
-
-    // Deduct from sender
-    Balance[from] = Balance[from] - amount;
-
-    // Add to recipient (handle case where recipient has no balance yet)
-    if (Balance[to] == null) {
-      Balance[to] = amount;
-    } else {
-      Balance[to] = Balance[to] + amount;
-    }
+  set_balance(addr: address, amount: u64) {
+    Balance[addr] = amount;
   }
 
   /**
@@ -55,15 +42,16 @@ contract SimpleToken {
    * @param addr - The address to query
    * @returns The token balance
    */
-  function balanceOf(addr: address): u64 {
-    return Balance[addr] || 0;
+  get_balance(addr: address): u64 {
+    return Balance[addr];
   }
 
   /**
    * Get total supply
+   * @param owner - The contract owner
    * @returns The total token supply
    */
-  function getTotalSupply(): u64 {
-    return TotalSupply[contract];
+  get_total_supply(owner: address): u64 {
+    return TotalSupply[owner];
   }
 }

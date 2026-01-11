@@ -1,0 +1,626 @@
+{
+  "info": {
+    "_postman_id": "js2move-api-collection",
+    "name": "JS2Move API Collection",
+    "description": "Complete API collection for JS2Move (MoveJS Compiler & Deployment Platform)",
+    "version": "1.0.0",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "exporter_id": "js2move"
+  },
+  "auth": {
+    "type": "noauth"
+  },
+  "item": [
+    {
+      "name": "Compiler Endpoints",
+      "description": "MoveJS compilation, validation, and analysis endpoints",
+      "item": [
+        {
+          "name": "Compile MoveJS Code",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response has success property', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('success');",
+                  "});",
+                  "",
+                  "if (pm.response.code === 200) {",
+                  "    pm.environment.set('compiled_output', pm.response.json().output);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"source\": \"module counter {\\n  resource Counter {\\n    value: u64\\n  }\\n\\n  public fun create(): Counter {\\n    return Counter { value: 0 };\\n  }\\n\\n  public fun increment(counter: &mut Counter) {\\n    counter.value = counter.value + 1;\\n  }\\n}\\n\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/public/compiler/compile",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "public", "compiler", "compile"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Validate MoveJS Code",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response has validation results', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.be.an('object');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"source\": \"module token {\\n  resource Coin {\\n    value: u64,\\n    owner: address\\n  }\\n\\n  public fun mint(owner: address, amount: u64): Coin {\\n    return Coin { value: amount, owner: owner };\\n  }\\n}\\n\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/public/compiler/validate",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "public", "compiler", "validate"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Analyze MoveJS Code",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response has analysis data', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.be.an('object');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"source\": \"module nft {\\n  resource NFT {\\n    id: u64,\\n    owner: address,\\n    metadata: string\\n  }\\n\\n  public fun create(id: u64, owner: address, metadata: string): NFT {\\n    return NFT { id, owner, metadata };\\n  }\\n}\\n\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/public/compiler/analyze",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "public", "compiler", "analyze"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Gas Estimation Endpoints",
+      "description": "Gas cost estimation endpoints",
+      "item": [
+        {
+          "name": "Estimate Gas for Code",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response has gas estimate', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('estimatedGas');",
+                  "});",
+                  "",
+                  "if (pm.response.code === 200) {",
+                  "    var data = pm.response.json();",
+                  "    pm.environment.set('gas_estimate', data.estimatedGas);",
+                  "    pm.environment.set('gas_price', data.gasPrice);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"source\": \"module vault {\\n  resource Vault {\\n    balance: u64\\n  }\\n\\n  public fun deposit(vault: &mut Vault, amount: u64) {\\n    vault.balance = vault.balance + amount;\\n  }\\n}\\n\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/public/gas/estimate",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "public", "gas", "estimate"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Current Gas Price",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response has gas price', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('gasPrice');",
+                  "});",
+                  "",
+                  "if (pm.response.code === 200) {",
+                  "    pm.environment.set('current_gas_price', pm.response.json().gasPrice);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/public/gas/price",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "public", "gas", "price"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Deployment Endpoints",
+      "description": "Contract deployment endpoints",
+      "item": [
+        {
+          "name": "Deploy Contract",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200 or 201', function() {",
+                  "    pm.expect([200, 201]).to.include(pm.response.code);",
+                  "});",
+                  "",
+                  "pm.test('Response has deployment data', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('success');",
+                  "});",
+                  "",
+                  "if (pm.response.code === 200 || pm.response.code === 201) {",
+                  "    var data = pm.response.json();",
+                  "    if (data.txHash) {",
+                  "        pm.environment.set('last_tx_hash', data.txHash);",
+                  "    }",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"source\": \"module marketplace {\\n  resource Listing {\\n    seller: address,\\n    item_id: u64,\\n    price: u64,\\n    active: bool\\n  }\\n\\n  public fun list_item(seller: address, item_id: u64, price: u64): Listing {\\n    return Listing { seller, item_id, price, active: true };\\n  }\\n}\\n\",\n  \"accountAddress\": \"0x1\",\n  \"network\": \"testnet\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/public/deploy",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "public", "deploy"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Deployments",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response is an array', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.be.an('array');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/public/deployments",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "public", "deployments"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Deployment by ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response has deployment details', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.be.an('object');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/public/deployment/{{deployment_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "public", "deployment", "{{deployment_id}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Deployment Status by TX Hash",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response has status info', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('status');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/public/deployment/status/{{last_tx_hash}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "public", "deployment", "status", "{{last_tx_hash}}"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Blockchain Helper Endpoints",
+      "description": "Blockchain query endpoints",
+      "item": [
+        {
+          "name": "Get Network Status",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response has network status', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('status');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/public/network/status",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "public", "network", "status"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Transaction Details",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200 or 404', function() {",
+                  "    pm.expect([200, 404]).to.include(pm.response.code);",
+                  "});",
+                  "",
+                  "pm.test('Response has transaction data or not found', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.be.an('object');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/public/transaction/0x1234567890abcdef",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "public", "transaction", "0x1234567890abcdef"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Account Information",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response has account info', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('address');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/public/account/0x1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "public", "account", "0x1"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Examples Endpoints",
+      "description": "Code examples and templates",
+      "item": [
+        {
+          "name": "Get All Examples",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response has examples array', function() {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData).to.have.property('examples');",
+                  "    pm.expect(jsonData.examples).to.be.an('array');",
+                  "});",
+                  "",
+                  "if (pm.response.code === 200) {",
+                  "    var examples = pm.response.json().examples;",
+                  "    if (examples.length > 0) {",
+                  "        pm.environment.set('example_id', examples[0].id);",
+                  "    }",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/public/examples",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "public", "examples"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Example by ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200 or 404', function() {",
+                  "    pm.expect([200, 404]).to.include(pm.response.code);",
+                  "});",
+                  "",
+                  "pm.test('Response has example data', function() {",
+                  "    if (pm.response.code === 200) {",
+                  "        var jsonData = pm.response.json();",
+                  "        pm.expect(jsonData).to.have.property('id');",
+                  "    }",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/public/example/{{example_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "public", "example", "{{example_id}}"]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Setup scripts run before each request",
+          "// You can use this to set up timestamps, tokens, etc."
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Global test script"
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8000",
+      "type": "string",
+      "disabled": false
+    },
+    {
+      "key": "deployment_id",
+      "value": "",
+      "type": "string",
+      "disabled": false
+    },
+    {
+      "key": "example_id",
+      "value": "",
+      "type": "string",
+      "disabled": false
+    },
+    {
+      "key": "last_tx_hash",
+      "value": "",
+      "type": "string",
+      "disabled": false
+    },
+    {
+      "key": "gas_estimate",
+      "value": "",
+      "type": "string",
+      "disabled": false
+    },
+    {
+      "key": "gas_price",
+      "value": "",
+      "type": "string",
+      "disabled": false
+    },
+    {
+      "key": "compiled_output",
+      "value": "",
+      "type": "string",
+      "disabled": false
+    },
+    {
+      "key": "current_gas_price",
+      "value": "",
+      "type": "string",
+      "disabled": false
+    }
+  ]
+}

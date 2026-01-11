@@ -144,6 +144,9 @@ importers:
 
   packages/backend:
     dependencies:
+      '@aptos-labs/ts-sdk':
+        specifier: ^5.2.0
+        version: 5.2.0(got@11.8.6)
       '@js2move/compiler':
         specifier: workspace:*
         version: link:../compiler

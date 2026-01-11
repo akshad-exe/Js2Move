@@ -39,16 +39,16 @@ Welcome to Js2Move! This index will help you find the right documentation.
 
 | Document | What's Inside | When to Use |
 |----------|---------------|-------------|
-| [DEPLOYMENT_ARCHITECTURE.md](./DEPLOYMENT_ARCHITECTURE.md) | Deployment system design | Building deploy features |
-| [DEPLOYMENT_ROADMAP.md](./DEPLOYMENT_ROADMAP.md) | Implementation plan | Planning development |
-| [ENHANCED_VISION.md](./ENHANCED_VISION.md) | Platform vision & strategy | Understanding roadmap |
+| [DEPLOYMENT_ARCHITECTURE.md](./docs/DEPLOYMENT_ARCHITECTURE.md) | Deployment system design | Building deploy features |
+| [DEPLOYMENT_ROADMAP.md](./docs/DEPLOYMENT_ROADMAP.md) | Implementation plan | Planning development |
+| [ENHANCED_VISION.md](./docs/ENHANCED_VISION.md) | Platform vision & strategy | Understanding roadmap |
 
 ### Team Guides 👥 NEW
 
 | Document | What's Inside | When to Use |
 |----------|---------------|-------------|
-| [SMART_CONTRACT_DEV_GUIDE.md](./SMART_CONTRACT_DEV_GUIDE.md) | SC developer onboarding | Move expert role |
-| [HBS_TEMPLATE_GUIDE.md](./HBS_TEMPLATE_GUIDE.md) | Handlebars templating | Working with templates |
+| [SMART_CONTRACT_DEV_GUIDE.md](./docs/SMART_CONTRACT_DEV_GUIDE.md) | SC developer onboarding | Move expert role |
+| [HBS_TEMPLATE_GUIDE.md](./docs/HBS_TEMPLATE_GUIDE.md) | Handlebars templating | Working with templates |
 
 ### For Reference
 
@@ -92,13 +92,13 @@ Used for automated testing. Add your test cases here!
 ### 🏗️ Compiler Developer
 1. [MoveSDK-doc.md](./MoveSDK-doc.md) - Compiler internals
 2. [ARCHITECTURE.md](./ARCHITECTURE.md) - Pipeline stages
-3. [HBS_TEMPLATE_GUIDE.md](./HBS_TEMPLATE_GUIDE.md) - Template system
+3. [HBS_TEMPLATE_GUIDE.md](./docs/HBS_TEMPLATE_GUIDE.md) - Template system
 4. [Fixtures](./packages/compiler/tests/fixtures/) - Test cases
 5. [PROJECT_OVERVIEW.md](./PROJECT_OVERVIEW.md) - Contributing section
 
 ### 🔧 Smart Contract Developer
-1. [SMART_CONTRACT_DEV_GUIDE.md](./SMART_CONTRACT_DEV_GUIDE.md) - Your onboarding guide
-2. [HBS_TEMPLATE_GUIDE.md](./HBS_TEMPLATE_GUIDE.md) - Learn templates
+1. [SMART_CONTRACT_DEV_GUIDE.md](./docs/SMART_CONTRACT_DEV_GUIDE.md) - Your onboarding guide
+2. [HBS_TEMPLATE_GUIDE.md](./docs/HBS_TEMPLATE_GUIDE.md) - Learn templates
 3. [Examples](./packages/compiler/examples/) - Sample contracts
 4. [ARCHITECTURE.md](./ARCHITECTURE.md) - Understand compiler flow
 
@@ -147,12 +147,12 @@ Used for automated testing. Add your test cases here!
 - [Compilation Pipeline](./ARCHITECTURE.md#-compilation-pipeline-detailed)
 - [Compiler Stages](./MoveSDK-doc.md#compiler-pipeline-detailed)
 - [Data Flow](./ARCHITECTURE.md#-api-request-flow)
-- [Template System](./HBS_TEMPLATE_GUIDE.md) - How code generation works
+- [Template System](./docs/HBS_TEMPLATE_GUIDE.md) - How code generation works
 - [Deployment Architecture](./DEPLOYMENT_ARCHITECTURE.md) - Deploy system design
 
 ### Team Resources
-- [Smart Contract Developer Guide](./SMART_CONTRACT_DEV_GUIDE.md) - SC dev onboarding
-- [HBS Template Guide](./HBS_TEMPLATE_GUIDE.md) - Template system tutorial
+- [Smart Contract Developer Guide](./docs/SMART_CONTRACT_DEV_GUIDE.md) - SC dev onboarding
+- [HBS Template Guide](./docs/HBS_TEMPLATE_GUIDE.md) - Template system tutorial
 - [Deployment Roadmap](./DEPLOYMENT_ROADMAP.md) - Implementation timeline
 
 ## 📂 Package Documentation
@@ -194,14 +194,30 @@ Root/
 ├── QUICK_START.md                  # ⭐ Start here
 ├── PROJECT_OVERVIEW.md             # Complete guide
 ├── ARCHITECTURE.md                 # Visual diagrams
-├── SUMMARY.md                      # Reindex summary
-├── CHANGELOG.md                    # What changed
 ├── MoveSDK-doc.md                  # Technical deep dive
-├── DEPLOYMENT_ARCHITECTURE.md      # Deployment system
-├── DEPLOYMENT_ROADMAP.md           # Implementation plan
-├── ENHANCED_VISION.md              # Platform vision
-├── SMART_CONTRACT_DEV_GUIDE.md     # SC dev onboarding
-├── HBS_TEMPLATE_GUIDE.md           # Template tutorial
+├── DOCS_INDEX.md                   # Documentation navigation
+│
+├── docs/
+│   ├── README.md                    # Documentation organization guide
+│   ├── DEPLOYMENT_CHECKLIST.md      # Deployment guide
+│   ├── SMART_CONTRACT_DEV_GUIDE.md  # SC dev onboarding
+│   ├── HBS_TEMPLATE_GUIDE.md        # Template tutorial
+│   ├── DEPLOYMENT_ARCHITECTURE.md   # Deployment system
+│   ├── Nginx-Guide.md               # Nginx configuration
+│   ├── postman/                     # Postman collections & guides
+│   │   ├── POSTMAN_SETUP_GUIDE.md   # API testing guide
+│   │   ├── POSTMAN_COLLECTION.json  # API test collection
+│   │   └── POSTMAN_ENV_LOCAL.json   # Local environment config
+│   └── archive/                      # Archived documentation
+│       ├── README.md                 # Archive explanation
+│       ├── DEPLOYMENT_CONTRACT_TEST_GUIDE.md # Contract testing (archived)
+│       ├── DEPLOYMENT_ROADMAP.md     # Implementation plan (archived)
+│       ├── ENHANCED_VISION.md        # Platform vision (archived)
+│       ├── FOLDER_STRUCTURE_DESIGN.md # Architecture rationale (archived)
+│       ├── MoveTranspilerIssues.md   # Transpiler fixes (archived)
+│       ├── SETUP_AND_DEPLOYMENT.md   # Deployment setup (archived)
+│       ├── SYSTEM_INDEX.md           # System index (archived)
+│       └── TEST_AUTOMATION_GUIDE.md  # Test automation (archived)
 │
 └── packages/
     └── compiler/
@@ -226,9 +242,9 @@ Root/
 | View diagrams | [ARCHITECTURE.md](./ARCHITECTURE.md) |
 | Read technical details | [MoveSDK-doc.md](./MoveSDK-doc.md) |
 | See what changed | [CHANGELOG.md](./CHANGELOG.md) |
-| Onboard as SC dev | [SMART_CONTRACT_DEV_GUIDE.md](./SMART_CONTRACT_DEV_GUIDE.md) |
-| Learn templates | [HBS_TEMPLATE_GUIDE.md](./HBS_TEMPLATE_GUIDE.md) |
-| Understand deployment | [DEPLOYMENT_ARCHITECTURE.md](./DEPLOYMENT_ARCHITECTURE.md) |
+| Onboard as SC dev | [SMART_CONTRACT_DEV_GUIDE.md](./docs/SMART_CONTRACT_DEV_GUIDE.md) |
+| Learn templates | [HBS_TEMPLATE_GUIDE.md](./docs/HBS_TEMPLATE_GUIDE.md) |
+| Understand deployment | [DEPLOYMENT_ARCHITECTURE.md](./docs/DEPLOYMENT_ARCHITECTURE.md) |
 
 ## 💡 Pro Tips
 

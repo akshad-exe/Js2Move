@@ -7,6 +7,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { fileURLToPath } from 'url';
 import { formatMoveCode } from './format.js';
+import { mapType, mapStructFieldType, shouldBeSigner } from './typeMapper.js';
 import {
   ContractNode,
   ResourceDeclarationNode,
@@ -99,8 +100,7 @@ export class Generator {
     return {
       moduleName: ast.name.name,
       imports: [
-        { module: 'std::signer' },
-        { module: 'std::vector' },
+        // Built-in types don't need imports in Move
       ],
       structs,
       functions,
@@ -117,8 +117,8 @@ export class Generator {
       abilities: ['key', 'store'],
       fields: node.fields?.map(field => ({
         name: field.name.name,
-        type: field.typeAnnotation.typeName,
-      })) || [{ name: 'value', type: 'u64' }], // Default field if none specified
+        type: mapStructFieldType(field.name.name, field.typeAnnotation.typeName),
+      })) || [{ name: 'value', type: mapType('u64') }], // Default field if none specified
       isResource: true,
     };
   }
@@ -127,14 +127,21 @@ export class Generator {
    * Convert function to template function
    */
   private convertFunction(node: FunctionDeclarationNode): TemplateFunction {
-    const params = node.parameters.map(p => this.convertParameter(p));
+    const isInit = node.name.name === 'init';
+    const isGetter = node.name.name.startsWith('get') || node.name.name.startsWith('view');
+    const params = node.parameters.map(p => this.convertParameter(p, isInit, isGetter, node.name.name));
     const acquires = this.findAcquires(node);
+    const returnType = node.returnType ? mapType(node.returnType.typeName) : undefined;
+    
+    // Determine visibility: entry functions are those that modify state (init, setters)
+    // Getters and view functions should be public
+    const visibility = isGetter || !!returnType ? 'public' : 'public entry';
 
     return {
-      visibility: 'public entry',
+      visibility,
       name: node.name.name,
       params,
-      returnType: node.returnType?.typeName,
+      returnType,
       acquires,
       statements: this.convertStatements(node.body.statements),
       hasReturn: this.hasReturnStatement(node.body.statements),
@@ -144,13 +151,15 @@ export class Generator {
   /**
    * Convert parameter
    */
-  private convertParameter(node: ParameterDeclarationNode): TemplateParam {
+  private convertParameter(node: ParameterDeclarationNode, isInitFunction: boolean = false, isGetterFunction: boolean = false, functionName: string = ''): TemplateParam {
     const typeName = node.typeAnnotation.typeName;
-    const isSigner = typeName === 'signer';
+    const paramName = node.name.name;
+    const isSigner = shouldBeSigner(paramName, typeName, isInitFunction, isGetterFunction);
+    const mappedType = mapType(typeName);
 
     return {
-      name: node.name.name,
-      type: typeName,
+      name: paramName,
+      type: mappedType,
       isSigner,
       isReference: isSigner,
       isMutable: false,
@@ -177,9 +186,9 @@ export class Generator {
       
       case NodeType.RETURN_STATEMENT:
         if (stmt.argument) {
-          return `return ${this.expressionToCode(stmt.argument)};`;
+          return `return ${this.expressionToCode(stmt.argument)}`;
         }
-        return 'return;';
+        return 'return';
       
       case NodeType.IF_STATEMENT:
         let code = `if (${this.expressionToCode(stmt.condition)}) ${this.statementToCode(stmt.consequent)}`;
@@ -259,9 +268,48 @@ export class Generator {
    * Find resources that need to be acquired
    */
   private findAcquires(node: FunctionDeclarationNode): string[] {
-    // Simple heuristic: look for resource names in statements
-    // TODO: Implement proper analysis
-    return [];
+    // Search for resource access patterns like borrow_global<ResourceName>
+    const acquires = new Set<string>();
+    const searchStatements = (stmts: StatementNode[]) => {
+      for (const stmt of stmts) {
+        const code = this.statementToCode(stmt);
+        
+        // Look for borrow_global<ResourceName>
+        const borrowMatch = code.match(/borrow_global<(\w+)>/g);
+        if (borrowMatch) {
+          borrowMatch.forEach(match => {
+            const resourceName = match.match(/borrow_global<(\w+)>/)?.[1];
+            if (resourceName) acquires.add(resourceName);
+          });
+        }
+        
+        // Look for move_from<ResourceName>
+        const moveFromMatch = code.match(/move_from<(\w+)>/g);
+        if (moveFromMatch) {
+          moveFromMatch.forEach(match => {
+            const resourceName = match.match(/move_from<(\w+)>/)?.[1];
+            if (resourceName) acquires.add(resourceName);
+          });
+        }
+
+        // Recursively search nested statements
+        if (stmt.type === NodeType.BLOCK_STATEMENT && stmt.statements) {
+          searchStatements(stmt.statements);
+        } else if (stmt.type === NodeType.IF_STATEMENT) {
+          if (stmt.consequent && stmt.consequent.type === NodeType.BLOCK_STATEMENT && stmt.consequent.statements) {
+            searchStatements(stmt.consequent.statements);
+          }
+          if (stmt.alternate && stmt.alternate.type === NodeType.BLOCK_STATEMENT && stmt.alternate.statements) {
+            searchStatements(stmt.alternate.statements);
+          }
+        } else if (stmt.type === NodeType.WHILE_STATEMENT && stmt.body && stmt.body.type === NodeType.BLOCK_STATEMENT && stmt.body.statements) {
+          searchStatements(stmt.body.statements);
+        }
+      }
+    };
+
+    searchStatements(node.body.statements);
+    return Array.from(acquires);
   }
 
   /**

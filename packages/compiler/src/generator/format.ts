@@ -222,14 +222,9 @@ function tryOfficialFormatterSync(code: string, timeout = 5000): string | null {
           continue;
         }
 
-        // If formatter wrote to stdout, use that; otherwise assume it formatted the file in-place
-        if (res.stdout && res.stdout.trim().length > 0) {
-          // Normalize to CRLF and return
-          return res.stdout.replace(/\r\n/g, '\n').replace(/\n/g, '\r\n');
-        }
-
+        // Check exit status first - movefmt writes the formatted code to the file on success
         if (res.status === 0) {
-          // Read file contents
+          // Read file contents (the formatter wrote the formatted code to the file)
           const formatted = fs.readFileSync(tmpPath, 'utf-8');
           return formatted.replace(/\r\n/g, '\n').replace(/\n/g, '\r\n');
         }
@@ -249,12 +244,13 @@ function tryOfficialFormatterSync(code: string, timeout = 5000): string | null {
 }
 
 export function formatMoveCode(code: string, indentSize = 2): string {
-  try {
-    const official = tryOfficialFormatterSync(code);
-    if (official) return official;
-  } catch (e) {
-    // best-effort: fall back silently
-  }
+  // Skip official formatter for now to avoid semicolon removal issues
+  // try {
+  //   const official = tryOfficialFormatterSync(code);
+  //   if (official) return official;
+  // } catch (e) {
+  //   // best-effort: fall back silently
+  // }
 
   return internalFormatMoveCode(code, indentSize);
 }

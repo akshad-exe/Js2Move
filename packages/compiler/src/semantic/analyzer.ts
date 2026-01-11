@@ -85,6 +85,7 @@ export class SemanticAnalyzer extends BaseASTVisitor<string> {
   private errors: SemanticError[] = [];
   private warnings: string[] = [];
   private resources = new Set<string>();
+  private resourceFields = new Map<string, { name: string; type: string } | null>();
   private functions = new Map<string, FunctionDeclarationNode>();
 
   constructor() {
@@ -172,6 +173,8 @@ export class SemanticAnalyzer extends BaseASTVisitor<string> {
   visitResourceDeclaration(node: ResourceDeclarationNode): string {
     // Check for duplicate fields
     const fieldNames = new Set<string>();
+    const fields: Array<{ name: string; type: string }> = [];
+
     node.fields?.forEach(field => {
       if (fieldNames.has(field.name.name)) {
         this.error(
@@ -184,7 +187,15 @@ export class SemanticAnalyzer extends BaseASTVisitor<string> {
 
       // Validate field types
       this.validateType(field.typeAnnotation.typeName, field.location);
+      fields.push({ name: field.name.name, type: field.typeAnnotation.typeName });
     });
+
+    // Record single-field resource information to allow shorthand assignments like Resource[index] = value
+    if (fields.length === 1) {
+      this.resourceFields.set(node.name.name, { name: fields[0].name, type: fields[0].type });
+    } else {
+      this.resourceFields.set(node.name.name, null);
+    }
 
     return 'resource';
   }
@@ -299,6 +310,16 @@ export class SemanticAnalyzer extends BaseASTVisitor<string> {
     const leftType = this.visit(node.left) || 'unknown';
     const rightType = this.visit(node.right) || 'unknown';
 
+    // Special-case: allow shorthand assignment into single-field resources
+    // e.g., Resource[index] = <value> where Resource has one field of the same type
+    if (node.left.type === NodeType.INDEX_EXPRESSION && this.resourceFields.has(leftType)) {
+      const info = this.resourceFields.get(leftType);
+      if (info && info.type === rightType) {
+        // allowed shorthand; underlying codegen will construct the resource
+        return leftType;
+      }
+    }
+
     // Check type compatibility
     if (leftType !== rightType && leftType !== 'unknown' && rightType !== 'unknown') {
       this.error(
@@ -401,6 +422,11 @@ export class SemanticAnalyzer extends BaseASTVisitor<string> {
         'UNDEFINED_IDENTIFIER'
       );
       return 'unknown';
+    }
+    // For resources, return the resource name itself (not the generic type 'resource')
+    // so that visitIndexExpression can check if it's in this.resources
+    if (symbol.kind === 'resource') {
+      return symbol.name;
     }
     return symbol.type;
   }

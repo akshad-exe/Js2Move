@@ -1,10 +1,55 @@
 import { compile as js2moveCompile, tokenize, parse, analyze } from '@js2move/compiler';
+import {
+  analyzeMoveJSError,
+  autoFixMoveJSCode,
+  validateMoveJSStructure
+} from './movejs-error-analyzer.service';
 
-export async function compile(source: string): Promise<string> {
+export interface CompileResult {
+  success: boolean;
+  code?: string;
+  error?: string;
+  analysis?: {
+    error: string;
+    description: string;
+    suggestions: string[];
+    examples?: { wrong: string; correct: string };
+    canAutoFix: boolean;
+    suggestedFix?: string | null;
+  };
+  autoFixOptions?: {
+    canFix: boolean;
+    fixedCode: string;
+    changes: string[];
+    requiresValidation: boolean;
+  };
+}
+
+export async function compile(source: string): Promise<CompileResult> {
   if (typeof source !== 'string') throw new Error('source must be a string');
-  const result = js2moveCompile(source);
-  if (typeof result === 'string') return result;
-  return result.code;
+  
+  try {
+    const result = js2moveCompile(source);
+    const code = typeof result === 'string' ? result : result.code;
+    
+    return {
+      success: true,
+      code
+    };
+  } catch (err) {
+    const errorMessage = err instanceof Error ? err.message : 'Unknown compilation error';
+    
+    // Analyze the error to provide helpful suggestions
+    const analysis = analyzeMoveJSError(errorMessage, source);
+    const autoFix = autoFixMoveJSCode(source);
+    
+    return {
+      success: false,
+      error: errorMessage,
+      analysis,
+      autoFixOptions: autoFix
+    };
+  }
 }
 
 export async function validate(source: string): Promise<{ valid: boolean; errors?: string[] }> {

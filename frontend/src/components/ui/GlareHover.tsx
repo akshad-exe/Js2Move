@@ -1,4 +1,4 @@
-import React, { ReactNode, CSSProperties } from 'react';
+import type { ReactNode, CSSProperties } from 'react';
 import './GlareHover.css';
 
 interface GlareHoverProps {
@@ -72,4 +72,3 @@ const GlareHover = ({
 };
 
 export default GlareHover;
-

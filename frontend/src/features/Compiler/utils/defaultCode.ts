@@ -18,7 +18,7 @@ export const DEFAULT_MOVEJS_CODE = `module counter {
 
 export const EXAMPLES = {
   counter: DEFAULT_MOVEJS_CODE,
-  
+
   token: `module token {
   resource Coin {
     value: u64

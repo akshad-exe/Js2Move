@@ -260,8 +260,8 @@ export class Lexer {
 
   private isAlpha(char: string): boolean {
     return (char >= 'a' && char <= 'z') ||
-           (char >= 'A' && char <= 'Z') ||
-           char === '_';
+      (char >= 'A' && char <= 'Z') ||
+      char === '_';
   }
 
   private isAlphaNumeric(char: string): boolean {

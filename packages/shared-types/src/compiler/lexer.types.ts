@@ -16,7 +16,7 @@ export enum TokenType {
   ASSERT = 'ASSERT',
   EMIT = 'EMIT',
   HAS_RESOURCE = 'HAS_RESOURCE',
-  
+
   // Types
   U8 = 'U8',
   U64 = 'U64',
@@ -26,14 +26,14 @@ export enum TokenType {
   SIGNER = 'SIGNER',
   STRING = 'STRING',
   VECTOR = 'VECTOR',
-  
+
   // Identifiers & Literals
   IDENTIFIER = 'IDENTIFIER',
   NUMBER = 'NUMBER',
   STRING_LITERAL = 'STRING_LITERAL',
   TRUE = 'TRUE',
   FALSE = 'FALSE',
-  
+
   // Operators
   PLUS = 'PLUS',              // +
   MINUS = 'MINUS',            // -
@@ -52,7 +52,7 @@ export enum TokenType {
   AND = 'AND',                // &&
   OR = 'OR',                  // ||
   NOT = 'NOT',                // !
-  
+
   // Delimiters
   LPAREN = 'LPAREN',          // (
   RPAREN = 'RPAREN',          // )
@@ -65,7 +65,7 @@ export enum TokenType {
   COLON = 'COLON',            // :
   DOT = 'DOT',                // .
   ARROW = 'ARROW',            // ->
-  
+
   // Special
   EOF = 'EOF',
   NEWLINE = 'NEWLINE',

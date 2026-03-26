@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { publicControllers } from '@/api/controllers/v1/public';
-import validateCompile from '@/middlewares/validateCompile';
+import validateCompile from '@/api/middleware/validateCompile';
 import { rateLimitMiddleware } from '@/api/middleware/ratelimit.middleware';
 
 const router: Router = Router();

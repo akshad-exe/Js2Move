@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { LandingPage } from "./features/pages/LandingPage";
-import { PlaygroundPage } from "./features/playground/PlaygroundPage";
+import { PlaygroundPage } from "./features/Compiler/PlaygroundPage";
 import { DocsPage } from "./features/pages/DocsPage";
 import { WaitlistPage } from "./features/pages/WaitlistPage";
 import { TeamPage } from "./features/pages/TeamPage";

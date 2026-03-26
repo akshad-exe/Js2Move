@@ -51,7 +51,7 @@ export function compile(source: string, options?: CompileOptions): string | Comp
   // 1. Tokenize
   const lexerResult = tokenize(source);
   if (lexerResult.errors.length > 0) {
-    const errors = lexerResult.errors.map(e => 
+    const errors = lexerResult.errors.map(e =>
       `${e.location.line}:${e.location.column} - ${e.message}`
     ).join('\n');
     throw new Error(`Lexer errors:\n${errors}`);
@@ -60,7 +60,7 @@ export function compile(source: string, options?: CompileOptions): string | Comp
   // 2. Parse
   const parserResult = parse(lexerResult.tokens);
   if (parserResult.errors.length > 0) {
-    const errors = parserResult.errors.map(e => 
+    const errors = parserResult.errors.map(e =>
       `${e.location.line}:${e.location.column} - ${e.message}`
     ).join('\n');
     throw new Error(`Parser errors:\n${errors}`);
@@ -71,7 +71,7 @@ export function compile(source: string, options?: CompileOptions): string | Comp
   if (!options?.skipSemanticAnalysis) {
     const semanticResult = analyze(parserResult.ast);
     if (semanticResult.errors.length > 0) {
-      const errors = semanticResult.errors.map(e => 
+      const errors = semanticResult.errors.map(e =>
         `${e.location.line}:${e.location.column} - ${e.message}`
       ).join('\n');
       throw new Error(`Semantic errors:\n${errors}`);
@@ -88,7 +88,7 @@ export function compile(source: string, options?: CompileOptions): string | Comp
 
   // 5. Code Generation
   const generatorResult = generate(parserResult.ast, options);
-  
+
   // Return result
   if (options?.outputIR || warnings.length > 0) {
     const allWarnings = [
@@ -101,6 +101,6 @@ export function compile(source: string, options?: CompileOptions): string | Comp
       ir,
     };
   }
-  
+
   return generatorResult.code;
 }
